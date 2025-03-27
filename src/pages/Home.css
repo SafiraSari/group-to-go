@@ -1,15 +1,15 @@
-@import url("constants.css");
+@import url("../constants.css");
 
-.App {
+.Home {
   text-align: center;
 }
 
-.App-logo {
+.Home-logo {
   height: 40vmin;
   pointer-events: none;
 }
 
-.App-header {
+.Home-header {
   background-color: white;
   min-height: 100vh;
   display: flex;
