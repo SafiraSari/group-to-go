@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
+import LoginPage from "./pages/Login";
 import Home from "./pages/Home";
 import Groups from "./pages/Groups";
 import Events from "./pages/Events";
@@ -17,6 +18,7 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/polls" element={<Polls />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
       </div>
     </Router>

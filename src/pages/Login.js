@@ -9,29 +9,33 @@ const LoginPage = () => {
         <div className="split-container">
             <div className="login-container"> {/*Left side - Login form */}
                 <div style={{width: "100%"}}>
+                <img src={logo} alt="Logo" className="logo-login"/>
                     <div className="login-header">
-                        <img src={logo} alt="Logo" className="logo" />
                         <h1 className="login-title">Login</h1>
                     </div>
                     <form className="login-form">
                         <div className="input-group">
-                            <input type="email" placeholder="Email" required />
+                            <p className="username-text">Username</p>
+                            <input type="username" placeholder="Username" required />
                         </div>
                         <div className="input-group">
+                            <p className="password-text">Password</p>
                             <input type="password" placeholder="Password" required />
                         </div>
                         <div className="login-options">
-                            <a href="#" className="not-user">Not a User? Sign In Here</a>
+                            <p className="not-user">Not a User? Sign In Here</p>
                         </div>
                         <button type="submit" className="login-btn">Login</button>
                     </form>
                 </div>
             </div>
             <div className="gradient-side"> {/* Right side - Gradient background */}
-                {/* <DotLottieReact
-                    src={login}
-                    autoplay
-                    loop /> */}
+                <DotLottieReact 
+                src={login}
+                className="login-animation"
+                loop
+                autoplay 
+                />
             </div>
         </div>
     );
