@@ -1,8 +1,9 @@
-.navigation-bar {
+.nav-bar {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 15px 7%;
+	padding: 15px 5%;
+	border-bottom: 1px solid var(--GRAY_LIGHT);
 }
 
 .logo {
@@ -12,32 +13,33 @@
 
 .nav-container {
 	flex: 1;
-	display: flex;
 	justify-content: center;
 }
 
-.nav-links {
+.nav-list {
 	display: flex;
 	list-style: none;
 	justify-content: center;
 	align-items: center;
-	gap: 50px;
 	padding: 0;
 	margin: 0;
 }
 
-.nav-links a{
+.nav-list a {
 	text-decoration: none;
 	color: black;
 }
 
-.nav-links a:hover{
+.nav-list a:hover{
 	color: var(--EMERALD)
 }
 
-.nav-links li {
+.nav-list li {
 	display: inline-block;
-	margin: 10px 60px;
-	padding: 0;
+	padding: 10px 60px;
 	cursor: pointer;
+}
+
+.nav-list li:not(:last-child) {
+	border-right: 1px solid var(--GRAY_LIGHT);
 }
