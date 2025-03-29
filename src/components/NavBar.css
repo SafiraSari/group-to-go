@@ -43,3 +43,6 @@
 .nav-list li:not(:last-child) {
 	border-right: 1px solid var(--GRAY_LIGHT);
 }
+.logout-icon{
+	width: 30px;
+}
