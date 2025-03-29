@@ -3,8 +3,8 @@ import './Home.css';
 
 function Home() {
   return (
-    <div className="Home">
-      <header className="Home-header">
+    <div className="home">
+      <header className="home-header">
         <img src={logo} className="Home-logo" alt="logo" />
         <p>
           Group to Go
@@ -13,5 +13,5 @@ function Home() {
     </div>
   );
 }
-  
+
 export default Home;

@@ -1,15 +1,15 @@
 @import url("../constants.css");
 
-.Home {
+.home {
   text-align: center;
 }
 
-.Home-logo {
+.home-logo {
   height: 40vmin;
   pointer-events: none;
 }
 
-.Home-header {
+.home-header {
   background-color: white;
   min-height: 100vh;
   display: flex;
