@@ -3,15 +3,13 @@ import './Home.css';
 
 function Home() {
   return (
-    <div className="Home">
-      <header className="Home-header">
-        <img src={logo} className="Home-logo" alt="logo" />
-        <p>
-          Group to Go
-        </p>
-      </header>
+    <div className="home">
+      <img src={logo} className="Home-logo" alt="logo" />
+      <p>
+        Group to Go
+      </p>
     </div>
   );
 }
-  
+
 export default Home;
