@@ -1,0 +1,140 @@
+@import url("../constants.css");
+
+/* Split container */
+.split-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.gradient-side {
+    flex: 1;
+    background: linear-gradient(270deg, var(--EMERALD), var(--TEAGREEN), var(--JASMINE), var(--SANDYBROWN), var(--DAVYGRAY));
+    background-size: 400% 400%;
+    animation: gradientAnimation 10s ease infinite;
+}
+
+.login-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    padding: 20px;
+}
+
+/* Keep your awesome gradient animation */
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.logo {
+    width: 150px;
+    height: 130px;
+    /* Remove these problematic margins */
+    /* margin-bottom: 100%; */
+    /* margin-right: 140%; */
+}
+
+.login-header {
+    margin-bottom: 30px;
+    width: 100%; 
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
+}
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: var(--DAVYGRAY);
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.divider::before {
+    margin-right: 10px;
+}
+
+.divider::after {
+    margin-left: 10px;
+}
+
+.login-title{
+    color: var(--DAVYGRAY);
+    text-align: center;
+}
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px;
+    width: 500px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--JASMINE);
+}
+
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0 25px;
+}
+
+.not-user {
+    display: block;
+    color: var(--JASMINE);
+    text-decoration: none;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.not-user:hover {
+    text-decoration: underline;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    width:100px;
+    background: linear-gradient(to right, var(--SANDYBROWN), var(--JASMINE));
+    border: none;
+    border-radius: 100px;
+    color: white;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
