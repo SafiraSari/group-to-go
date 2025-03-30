@@ -2,7 +2,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 15px 5%;
+	padding: 12px 5%;
 	border-bottom: 1px solid var(--GRAY_LIGHT);
 }
 
@@ -55,6 +55,6 @@
 }
 
 .tab-label {
-  font-size: 15px;
+	font-size: 1rem;
   margin-top: 8px;
 }
