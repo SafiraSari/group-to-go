@@ -2,7 +2,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 15px 5%;
+	padding: 12px 5%;
 	border-bottom: 1px solid var(--GRAY_LIGHT);
 }
 
@@ -27,11 +27,11 @@
 
 .nav-list a {
 	text-decoration: none;
-	color: black;
+	color: var(--GRAY);
 }
 
 .nav-list a:hover{
-	color: var(--EMERALD)
+	color: var(--EMERALD);
 }
 
 .nav-list li {
@@ -43,6 +43,18 @@
 .nav-list li:not(:last-child) {
 	border-right: 1px solid var(--GRAY_LIGHT);
 }
-.logout-icon{
+
+.tab-icon{
 	width: 30px;
+}
+
+.tab-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tab-label {
+	font-size: 1rem;
+  margin-top: 8px;
 }

@@ -1,0 +1,40 @@
+.input-group {
+  margin-bottom: 20px;
+  text-align: left;
+  width: 100%;
+}
+
+.input-label {
+  display: block;
+  color: var(--SANDY);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 18px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 1rem;
+  margin-bottom:20px ;
+  transition: border 0.3s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--JASMINE);
+}
+
+.input-group input::placeholder {
+  color: var(--GRAY); 
+  opacity: 0.5; 
+}
+
+@media (max-width: 600px) {
+  .input-group input {
+    font-size: 1rem;
+    padding: 15px;
+    width: 60%;
+  }
+}

@@ -1,10 +1,16 @@
+import NavBar from "../components/NavBar";
+
 const Schedule = () => {
   return (
-		<div >
+    <>
+      <NavBar />
+      <div>
 
 
 
-		</div>
+
+      </div>
+    </>
   )
 }
 

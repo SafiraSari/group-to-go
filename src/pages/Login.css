@@ -87,36 +87,6 @@
     margin: 0 auto;
     padding: 20px;
 }
-/* Form inputs */
-.input-group {
-    margin-bottom: 20px;
-    text-align: left;
-    width: 100%;
-}
-.input-group input {
-    width: 100%;
-    padding: 18px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    font-size: 1rem;
-    margin-bottom:20px ;
-    transition: border 0.3s ease;
-}
-.input-group input:focus {
-    outline: none;
-    border-color: var(--JASMINE);
-}
-
-.input-group input::placeholder {
-    color: var(--GRAY); 
-    opacity: 0.5; 
-}
-.username-text, .password-text {
-    display: block;
-    color: var(--SANDY);
-    font-size: 0.9rem;
-    font-weight: 500;
-}
 /* Login options */
 .login-options {
     display: flex;
@@ -137,42 +107,10 @@
     text-align: center;
 }
 
-/* Login button */
-.login-btn {
-    width: 40%;
-    padding: 18px;
-    background: linear-gradient(to right, var(--SANDY), var(--JASMINE));
-    border: none;
-    border-radius: 100px;
-    color: white;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    max-width: 400px;
-}
-
-.login-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
 .login-animation{
     height:70%;
     width:70%;
     position: relative;
     top: 140px;
     left: 150px;
-}
-
-@media (max-width: 600px) {
-    .input-group input {
-        font-size: 0.9rem;
-        padding: 15px;
-        width: 60%;
-    }
-
-    .login-btn {
-        font-size: 0.9rem;
-        padding: 12px;
-    }
 }
