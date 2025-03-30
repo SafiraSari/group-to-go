@@ -23,7 +23,7 @@ const LoginPage = () => {
                             <input type="password" placeholder="Password" required />
                         </div>
                         <div className="login-options">
-                            <p className="not-user">Not a User? Sign In Here</p>
+                            <p className="not-user">Not a User? Sign Up Here</p>
                         </div>
                         <button type="submit" className="login-btn">Login</button>
                     </form>
@@ -31,10 +31,10 @@ const LoginPage = () => {
             </div>
             <div className="gradient-side"> {/* Right side - Gradient background */}
                 <DotLottieReact 
-                src={login}
-                className="login-animation"
-                loop
-                autoplay 
+                    src={login}
+                    className="login-animation"
+                    loop
+                    autoplay 
                 />
             </div>
         </div>

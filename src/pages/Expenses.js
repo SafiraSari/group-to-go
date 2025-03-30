@@ -1,6 +1,6 @@
 import NavBar from "../components/NavBar";
 
-const Events = () => {
+const Expenses = () => {
   return (
     <>
       <NavBar />
@@ -14,4 +14,4 @@ const Events = () => {
   )
 }
 
-export default Events;
+export default Expenses;

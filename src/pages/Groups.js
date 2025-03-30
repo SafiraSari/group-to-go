@@ -1,10 +1,16 @@
+import NavBar from "../components/NavBar";
+
 const Groups = () => {
   return (
-		<div >
+    <>
+      <NavBar />
+      <div>
 
 
 
-		</div>
+
+      </div>
+    </>
   )
 }
 
