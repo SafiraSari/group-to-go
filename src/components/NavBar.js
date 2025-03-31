@@ -8,7 +8,6 @@ import events from "../assets/events.png"
 import schedule from "../assets/schedule.png"
 import expenses from "../assets/expenses.png"
 import polls from "../assets/polls.png"
-import logout from "../assets/logout.png";
 
 const NavBar = () => {
   return (
