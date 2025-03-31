@@ -54,7 +54,7 @@ const SignupPage = () => {
                         <Input label="Username" type="username" placeholder="Username" isRequired value={username} onChange={(e) => setUsername(e.target.value)} />
                         <Input label="Password" type="password" placeholder="Password" isRequired value={password} onChange={(e) => setPassword(e.target.value)}/>
                         <div className="signup-options">
-                            <Link to="/login" className="not-user">Already a User? Log In Here</Link> {/* Sign Up will be changed to a link that will redirect the user to the signup page */}
+                            <Link to="/login" className="not-user">Already a User? Log In Here</Link> 
                         </div>
                         <Button type="submit" label="Sign Up"/>
                         {error && <p id="error">{error}</p>}

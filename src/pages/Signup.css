@@ -41,7 +41,7 @@
     }
 }
 
-/* Login container */
+/* Signup container */
 .signup-container {
     flex: 1;
     display: flex;
@@ -63,7 +63,7 @@
     cursor: pointer;
     margin: 0;
 }
-/* Login header */
+/* Signup header */
 .signup-header {
     margin-bottom: 80px;
     width: 100%;
@@ -80,14 +80,14 @@
     font-size: 50px;
 }
 
-/* Login form */
+/* Signup form */
 .signup-form {
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
 }
-/* Login options */
+/* Signup options */
 .signup-options {
     display: flex;
     justify-content: space-between;
