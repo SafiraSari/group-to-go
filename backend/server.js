@@ -10,12 +10,15 @@ const port = 3500;
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
+
+require('dotenv').config();
+
 // MySQL Connection Configuration
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Asu21244',
-    database: 'GroupToGo'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
 });
 
 // Connect to MySQL
@@ -52,7 +55,6 @@ app.post('/signup', (req, res) => {
 });
 
 app.post('/login', async(req, res) => {
-    console.log("Received request body:", req.body);
     const { username, password } = req.body;
     if (!username || !password) {
         return res.status(400).json({message:'Username and password are required'});

@@ -1,9 +1,9 @@
 import './Button.css';
 
-const Button = ({label, onClick, type = 'button'}) => {
+const Button = ({label, type = 'button'}) => {
   return (
     <div>
-      <button type={type} className="button" onClick={onClick}>{label}</button>
+      <button type={type} className="button">{label}</button>
     </div>
   )
 }

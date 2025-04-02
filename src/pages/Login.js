@@ -16,7 +16,7 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const handleLogin = async (e) => {
         e.preventDefault();
-        try{
+        try {
             const response = await fetch('http://localhost:3500/login', {
                 method: 'POST',
                 headers: {
@@ -24,24 +24,23 @@ const LoginPage = () => {
                 },
                 body: JSON.stringify({ username, password }),
             });
-            if(!response.ok) {
+            if (!response.ok) {
                 console.log('Login failed');
-                if(response.status === 401){
+                if (response.status === 401) {
                     SetError('Incorrect username or password');
                 }
-                if(response.status === 400){
+                if (response.status === 400) {
                     SetError('Username and password are required');
                 }
-                if(response.status === 404){
+                if (response.status === 404) {
                     SetError('User not found. Please enter another username or signup!');
                 }
             }
-            if(response.ok){ 
+            else {
                 console.log('Login successful');
                 navigate('/');
             }
-                     
-        }catch(error){
+        } catch (error) {
             SetError('Error connecting to server')
         }
 
@@ -49,28 +48,28 @@ const LoginPage = () => {
     return (
         <div className="split-container">
             <div className="login-container"> {/*Left side - Login form */}
-                <div style={{width: "100%"}}>
-                    <img src={logo} alt="Logo" className="logo-login"/>
+                <div style={{ width: "100%" }}>
+                    <img src={logo} alt="Logo" className="logo-login" />
                     <div className="login-header">
                         <h1 className="login-title">Login</h1>
                     </div>
                     <form className="login-form" onSubmit={handleLogin}>
-                        <Input label="Username" type="username" placeholder="Username" isRequired value={username} onChange={(e) => setUsername(e.target.value)}/>
+                        <Input label="Username" type="username" placeholder="Username" isRequired value={username} onChange={(e) => setUsername(e.target.value)} />
                         <Input label="Password" type="password" placeholder="Password" isRequired value={password} onChange={(e) => setPassword(e.target.value)} />
                         <div className="login-options">
                             <Link to="/signup" className="not-user">Not a user? Create an account</Link>
                         </div>
-                        <Button type="submit" label="Login"/>
+                        <Button type="submit" label="Login" />
                         {error && <p id="error">{error}</p>}
                     </form>
                 </div>
             </div>
             <div className="gradient-side"> {/* Right side - Gradient background */}
-                <DotLottieReact 
+                <DotLottieReact
                     src={login}
                     className="login-animation"
                     loop
-                    autoplay 
+                    autoplay
                 />
             </div>
         </div>
