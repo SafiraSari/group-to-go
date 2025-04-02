@@ -54,7 +54,7 @@ const LoginPage = () => {
                         <h1 className="login-title">Login</h1>
                     </div>
                     <form className="login-form" onSubmit={handleLogin}>
-                        <Input label="Username" type="username" placeholder="Username" isRequired value={username} onChange={(e) => setUsername(e.target.value)} />
+                        <Input label="Username" type="text" placeholder="Username" isRequired value={username} onChange={(e) => setUsername(e.target.value)} />
                         <Input label="Password" type="password" placeholder="Password" isRequired value={password} onChange={(e) => setPassword(e.target.value)} />
                         <div className="login-options">
                             <Link to="/signup" className="not-user">Not a user? Create an account</Link>

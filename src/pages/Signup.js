@@ -51,7 +51,7 @@ const SignupPage = () => {
                         <h1 className="signup-title">SignUp</h1>
                     </div>
                     <form className="signup-form" onSubmit={handleSignUp}>
-                        <Input label="Username" type="username" placeholder="Username" isRequired value={username} onChange={(e) => setUsername(e.target.value)} />
+                        <Input label="Username" type="text" placeholder="Username" isRequired value={username} onChange={(e) => setUsername(e.target.value)} />
                         <Input label="Password" type="password" placeholder="Password" isRequired value={password} onChange={(e) => setPassword(e.target.value)} />
                         <div className="signup-options">
                             <Link to="/login" className="not-user">Already a User? Log In Here</Link>
