@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import './NavBar.css';
+import logout from "../assets/logout.png";
 import logo from "../assets/logo_horizontal.png"
 import home from "../assets/home.png"
 import groups from "../assets/groups.png"
@@ -7,7 +8,6 @@ import events from "../assets/events.png"
 import schedule from "../assets/schedule.png"
 import expenses from "../assets/expenses.png"
 import polls from "../assets/polls.png"
-import logout from "../assets/logout.png";
 
 const NavBar = () => {
   return (

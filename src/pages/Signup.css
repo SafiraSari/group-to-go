@@ -41,8 +41,8 @@
     }
 }
 
-/* Login container */
-.login-container {
+/* Signup container */
+.signup-container {
     flex: 1;
     display: flex;
     justify-content: center;
@@ -55,7 +55,7 @@
     width: 100%;
 }
 /* Logo */
-.logo-login {
+.logo-signup {
     width: 170px;
     position: absolute;  
     top: 20px;          
@@ -63,8 +63,8 @@
     cursor: pointer;
     margin: 0;
 }
-/* Login header */
-.login-header {
+/* Signup header */
+.signup-header {
     margin-bottom: 80px;
     width: 100%;
     display: flex;
@@ -73,27 +73,27 @@
     align-items: center;
     flex-direction: column;
 }
-.login-title{
+.signup-title{
     color: var(--SANDY);
     margin-bottom: 10px;
     font-weight: 800;
     font-size: 50px;
 }
 
-/* Login form */
-.login-form {
+/* Signup form */
+.signup-form {
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
 }
-/* Login options */
-.login-options {
+/* Signup options */
+.signup-options {
     display: flex;
     justify-content: space-between;
     margin: 15px 0 25px;
 }
-.login-options {
+.signup-options {
     display: flex;
     justify-content: center;
     margin: 15px 0 25px;
@@ -108,13 +108,14 @@
     text-decoration: underline;
 }
 
-.login-animation{
+.signup-animation{
     height:70%;
     width:70%;
     position: relative;
     top: 140px;
     left: 150px;
 }
+
 #error{
     color: var(--ERROR);
 }
