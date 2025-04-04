@@ -1,10 +1,10 @@
 import './Button.css';
 
-const Button = ({label, type = 'button'}) => {
+const Button = ({label, type = "button", variant = "yellow", onClick = () => {}}) => {
   return (
-    <div>
-      <button type={type} className="button">{label}</button>
-    </div>
+    <button type={type} className={`button ${variant}`} onClick={onClick} >
+      {label}
+    </button>
   )
 }
 
