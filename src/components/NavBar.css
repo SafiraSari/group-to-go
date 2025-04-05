@@ -30,8 +30,8 @@
 	color: var(--GRAY);
 }
 
-.nav-list a:hover{
-	color: var(--EMERALD);
+.nav-list a:hover {
+	color: var(--CARAMEL);
 }
 
 .nav-list li {
@@ -49,7 +49,7 @@
 	border-right: 1px solid var(--GRAY_LIGHT);
 }
 
-.tab-icon{
+.tab-icon {
 	width: 30px;
 }
 

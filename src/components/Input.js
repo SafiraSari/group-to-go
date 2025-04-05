@@ -9,4 +9,4 @@ const Input = ({label, type="text", placeholder, isRequired=false, value, onChan
   )
 }
 
-export default Input;
+export default Input; 

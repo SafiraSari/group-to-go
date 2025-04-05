@@ -1,0 +1,32 @@
+/* Polls Modal */
+.polls-container {
+  width: 70%;
+}
+
+.polls-container h3 {
+  display: block;
+  color: var(--CARAMEL);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.option-button {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 20px;
+}
+
+.error {
+  color: var(--RED);
+}
+
+.selected-category {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.category-image {
+  width: 30%;
+  height: auto;
+  margin-top: 10px;
+} 
