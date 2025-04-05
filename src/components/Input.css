@@ -6,8 +6,8 @@
 
 .input-label {
   display: block;
-  color: var(--SANDY);
-  font-size: 1rem;
+  color: var(--CARAMEL);
+  font-size: 1.1rem;
   font-weight: 500;
 }
 
@@ -17,18 +17,20 @@
   border: 1px solid #ddd;
   border-radius: 20px;
   font-size: 1rem;
-  margin-bottom:20px ;
+  margin-bottom: 15px ;
   transition: border 0.3s ease;
+  background-color: var(--OFF_WHITE);
+  border-color: var(--SILVER);
 }
 
 .input-group input:focus {
   outline: none;
-  border-color: var(--JASMINE);
+  border-color: var(--SANDY);
 }
 
 .input-group input::placeholder {
   color: var(--GRAY); 
-  opacity: 0.5; 
+  opacity: 0.6; 
 }
 
 @media (max-width: 600px) {

@@ -44,5 +44,5 @@ npm start
 
 - Ferhaan Hawas
 - Hawa Said
-- [Safira Sari](https://www.linkedin.com/in/safira-sari/)
+- Safira Sari
 - Frankies Vat

@@ -50,7 +50,6 @@
     align-items: center;
     text-align: center;
     position:relative;
-    background-color: white;
     padding: 20px;
     width: 100%;
 }
@@ -117,5 +116,5 @@
 }
 
 #error{
-    color: var(--ERROR);
+    color: var(--PINK);
 }
