@@ -53,9 +53,15 @@ const Polls = () => {
     <>
       <NavBar />
       <div className="polls-container">
+
+        <div className="header-title">
+          <h1>POLLS</h1>
+        </div>
+
+        <Button label="+ Create New Poll" onClick={() => setModalOpen(true)} />
+
         {modalOpen && (        
           <Modal onSubmit={handleButtonClick} onCancel={handleButtonClick} onClose={handleButtonClick} >
-
             <h1>CREATING NEW POLL</h1>
             <Input label="Poll Name" placeholder="Poll Name" isRequired />
             
@@ -84,11 +90,9 @@ const Polls = () => {
                 <Button label="+ Add Option" onClick={addOption} />
               </div>
             </div>
-
             <Input label="Notes" type="text" placeholder="Enter any additional details..." />
           </Modal>
         )}
-        <Button label="+ Create New Poll" onClick={() => setModalOpen(true)} />
       </div>
     </>
   );
