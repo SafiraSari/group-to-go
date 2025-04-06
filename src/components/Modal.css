@@ -13,8 +13,8 @@
   background-color: white;
   border-radius: 5px;
   padding: 2rem;
-  width: 55%;
-  height: 80vh;
+  width: 45%;
+  height: 66vh;
   overflow-y: auto;  
   justify-content: center;
 }
@@ -39,6 +39,7 @@
 }
 
 .modal-footer {
+  margin-top: 3rem;
   display: flex;
   justify-content: space-evenly;
 }
