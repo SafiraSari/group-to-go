@@ -1,14 +1,12 @@
+import React from 'react';
 import NavBar from "../components/NavBar";
+import EventCreationPage from "../components/EventCreationPage"; 
 
 const Events = () => {
   return (
     <>
-      <NavBar />
-      <div>
-
-
-
-
+      <div className="events-container">
+        <EventCreationPage />
       </div>
     </>
   )
