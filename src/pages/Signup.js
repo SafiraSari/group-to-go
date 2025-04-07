@@ -48,7 +48,7 @@ const SignupPage = () => {
                 <div style={{ width: "100%" }}>
                     <img src={logo} alt="Logo" className="logo-login" />
                     <div className="signup-header">
-                        <h1 className="signup-title">SignUp</h1>
+                        <h1 className="signup-title">Sign Up</h1>
                     </div>
                     <form className="signup-form" onSubmit={handleSignUp}>
                         <Input label="Username" type="text" placeholder="Username" isRequired value={username} onChange={(e) => setUsername(e.target.value)} />
