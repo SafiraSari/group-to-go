@@ -1,8 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql2');
 const cors = require('cors');
+const admin = require('firebase-admin');
 const bcrypt = require('bcrypt'); //To hash passwords
+const db = require('../backend/FirebaseConfig');
 
 const app = express();
 const port = 3500;
@@ -12,45 +13,30 @@ app.use(cors());
 app.use(express.json());
 
 require('dotenv').config();
-
-// MySQL Connection Configuration
-const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME
-});
-
-// Connect to MySQL
-db.connect(err => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err);
-        return;
-    }
-    console.log('Connected to MySQL database');
-});
 // API Endpoint to handle user registration
-app.post('/signup', (req, res) => {
+app.post('/signup', async(req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
         return res.status(400).json({message:'Username and password are required'});
     }
+    const usersRef = db.ref('users');
+    const userRef = usersRef.child(username);
+
     try {
-        const hashedPassword = bcrypt.hashSync(password, 10);
-        const INSERT_USER_QUERY = `INSERT INTO user (username, password) VALUES (?, ?)`;
-        db.query(INSERT_USER_QUERY, [username, hashedPassword], (err, results) => {
-            if (err) {
-                console.error('Error inserting user:', err);
-                res.status(500).json({error:'Error inserting user'});
-                return;
-            }
-            console.log('User inserted successfully');
-            res.status(200).json({message:'User inserted successfully'});
-        });
-    } catch (error) {
-        console.error('Error hashing password:', error);
-        res.status(500).json({error:'Error hashing password'});
+        // Check if user already exists
+        const snapshot = await userRef.once('value');
+        if (snapshot.exists()) {
+            return res.status(409).json({ error: 'Username already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await userRef.set({ password: hashedPassword });
+
+        return res.status(200).json({ message: 'User registered successfully!' });
+    } catch (err) {
+        console.error('Signup error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -59,32 +45,25 @@ app.post('/login', async(req, res) => {
     if (!username || !password) {
         return res.status(400).json({message:'Username and password are required'});
     }
-    const SELECT_USER_QUERY = `SELECT * FROM user WHERE username = ?`;
-    
-    try {
-        const results = await new Promise((resolve, reject) => {
-            db.query(SELECT_USER_QUERY, [username], (err, results) => {
-                if (err) reject(err);
-                else resolve(results);
-            });
-        });
+    const userRef = db.ref(`users/${username}`);
 
-        if (results.length === 0) {
-            return res.status(404).json({ error: 'User not found. Please enter another username or sign up!' });
+    try {
+        const snapshot = await userRef.once('value');
+        if (!snapshot.exists()) {
+            return res.status(404).json({ error: 'User not found' });
         }
 
-        const user = results[0];
+        const userData = snapshot.val();
+        const isMatch = await bcrypt.compare(password, userData.password);
 
-        // Compare passwords using bcrypt
-        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ error: 'Incorrect password' });
         }
-        return res.status(200).json({ message: 'Login successful!' });
 
-    } catch (error) {
-        console.error('Error during login:', error);
-        return res.status(500).json({ error: 'Error processing request' });
+        return res.status(200).json({ message: 'Login successful!' });
+    } catch (err) {
+        console.error('Login error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
