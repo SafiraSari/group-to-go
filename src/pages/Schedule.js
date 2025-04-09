@@ -15,6 +15,7 @@ const Schedule = () => {
   const [newUserName, setNewUserName] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [eventTitle, setEventTitle] = useState("");
+  const [userID, setUserID] = useState("");
   
   // Days and time slots for the grid
   const days = ["Sun","Mon", "Tue", "Wed", "Thu", "Fri","Sat",];
@@ -222,6 +223,14 @@ const Schedule = () => {
             onClose={handleModalCancel}
           >
             <h1>CREATE NEW SCHEDULE</h1>
+            <Input 
+              label="UserId" 
+              placeholder="Enter user ID" 
+              value={userID}
+              onChange={(e) => setEventTitle(e.target.value)}
+              isRequired 
+            />
+
             <Input 
               label="Event Title" 
               placeholder="Enter event title" 

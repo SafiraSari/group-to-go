@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import Button from "../components/Button";
 import Input from "../components/Input";
@@ -22,11 +22,40 @@ const Events = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [eventCountdowns, setEventCountdowns] = useState({});
+
+  const [selectedCountdown, setSelectedCountdown] = useState("");
 
   const [events, setEvents] = useState([
     { id: 1, name: "Pizza Party Poll", category: "Food", createdAt: "2025-04-01" },
     { id: 2, name: "Best Activity?", category: "Activity", createdAt: "2025-04-02" },
   ]);
+
+  const getCountdown = (dateString) => {
+    const now = new Date();
+    const eventDate = new Date(dateString);
+    const diff = eventDate - now;
+
+    if (diff <= 0) return "Started";
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  useEffect(() => {
+    if (!selectedEvent) return;
+
+    const updateCountdown = () => {
+      setSelectedCountdown(getCountdown(selectedEvent.createdAt));
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [selectedEvent]);
 
   const handleCreateEvent = () => {
     const eventData = {
@@ -135,6 +164,7 @@ const Events = () => {
             <h3>{event.name}</h3>
             <p><strong>Category:</strong> {event.category}</p>
             <p><strong>Date:</strong> {event.createdAt}</p>
+            <p><strong>Countdown:</strong> {getCountdown(event.CreatedAt)}</p>
           </li>
         ))}
       </ul>
@@ -151,13 +181,16 @@ const Events = () => {
                   setSelectedEvent({ ...selectedEvent, name: e.target.value })
                 }
               />
-              <Input
-                label="Category"
-                value={selectedEvent.category}
-                onChange={(e) =>
-                  setSelectedEvent({ ...selectedEvent, category: e.target.value })
-                }
-              />
+              <h3>Category: <strong>{category}</strong></h3>
+              <div className="option-button">
+              {categories.map((cat, index) => (
+                <Button
+                  key={index}
+                  label={cat}
+                  onClick={() => setCategory(cat)}
+                />
+              ))}
+            </div>
               <Input
                 label="Date"
                 type="date"
@@ -183,15 +216,19 @@ const Events = () => {
               </div>
             </>
           ) : (
+            
             <>
               <h2>{selectedEvent.name}</h2>
               <p><strong>Category:</strong> {selectedEvent.category}</p>
               <p><strong>Date:</strong> {selectedEvent.createdAt}</p>
+              <p><strong>Countdown:</strong> {selectedCountdown}</p>
+
               <div className="option-button">
                 <Button label="Edit" onClick={() => setIsEditing(true)} />
                 <Button label="Delete" onClick={() => { setEvents(events.filter((e) => e.id !== selectedEvent.id)); setSelectedEvent(null);}}
                 />
               </div>
+
             </>
           )}
         </Modal>
