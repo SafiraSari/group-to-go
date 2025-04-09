@@ -1,0 +1,42 @@
+.accordion {
+  background-color: var(--JASMINE);
+  color: var(--GRAY);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+  margin-top: 15px;
+}
+
+.accordion:hover {
+  background-color: var(--SANDY);
+}
+
+.accordion-panel {
+  padding: 0 18px;
+  background-color: white;
+  display: none;
+  overflow: hidden;
+  border-bottom: 1px solid var(--GRAY_LIGHT);
+  margin-bottom: 15px;
+}
+
+.accordion-panel.open {
+  display: block;
+}
+
+.accordion:after {
+  content: '+';
+  font-size: 20px;
+  color: var(--GRAY);
+  float: right;
+  margin-left: 5px;
+}
+
+.active:after {
+  content: "-";
+}
