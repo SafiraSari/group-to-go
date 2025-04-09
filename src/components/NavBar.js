@@ -7,6 +7,7 @@ import groups from "../assets/groups.png"
 import events from "../assets/events.png"
 import schedule from "../assets/schedule.png"
 import expenses from "../assets/expenses.png"
+import search from "../assets/search.png"
 import polls from "../assets/polls.png"
 
 const NavBar = () => {
@@ -62,6 +63,14 @@ const NavBar = () => {
               <div className="tab-container">
                 <img src={polls} alt="Polls" className="tab-icon" />
                 <span className="tab-label">Polls</span>
+              </div>
+            </Link>
+          </li>
+          <li>
+            <Link to="/search">
+              <div className="tab-container">
+                <img src={search} alt="search" className="tab-icon" />
+                <span className="tab-label">Search</span>
               </div>
             </Link>
           </li>
