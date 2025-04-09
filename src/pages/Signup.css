@@ -116,7 +116,7 @@
 }
 
 #error{
-    color: var(--PINK);
+    color: var(--RED);
 }
 .signup-confirmation-overlay {
     position: fixed;

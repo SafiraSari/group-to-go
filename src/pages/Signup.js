@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo_horizontal.png";
-import signup from "../assets/lottieanimations/signup.lottie";
+import signup from "../assets/animations/signup.lottie";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import "./Signup.css";
 import Button from "../components/Button";
@@ -83,7 +83,7 @@ const SignupPage = () => {
                         <p className="signup-confirmation-text">Are you sure you want to create an account?</p>
                         <div className="signup-confirmation-buttons">
                             <Button label={"No"} variant="red" onClick={() => setShowConfirmation(false)} />
-                             <Button label={"Yes"} variant="green" onClick={confirmSignUp} />
+                            <Button label={"Yes"} variant="green" onClick={confirmSignUp} />
                         </div>
                     </div>
                 </div>
