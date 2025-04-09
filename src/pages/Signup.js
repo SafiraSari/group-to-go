@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import logo from "../assets/logo_horizontal.png";
 import signup from "../assets/animations/signup.lottie";
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import "./Signup.css";
 import Button from "../components/Button";
 import Input from "../components/Input";
+import Confirmation from "../components/Confirmation";
+import "./Signup.css";
 
 const SignupPage = () => {
     const [username, setUsername] = useState('');
@@ -78,15 +79,7 @@ const SignupPage = () => {
 
             {/* popup for user to confirm they want to signup */}
             {showConfirmation && (
-                <div className="signup-confirmation-overlay">
-                    <div className="signup-confirmation-box">
-                        <p className="signup-confirmation-text">Are you sure you want to create an account?</p>
-                        <div className="signup-confirmation-buttons">
-                            <Button label={"No"} variant="red" onClick={() => setShowConfirmation(false)} />
-                            <Button label={"Yes"} variant="green" onClick={confirmSignUp} />
-                        </div>
-                    </div>
-                </div>
+                <Confirmation label="create an account" onCancel={() => setShowConfirmation(false)} onConfirm={confirmSignUp}/>
             )}
         </div>
     );
