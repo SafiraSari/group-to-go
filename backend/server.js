@@ -146,6 +146,33 @@ app.get('/events', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+app.delete('/event/:eventName', async (req, res) => {
+    const { eventName } = req.params;
+  
+    if (!eventName) {
+      return res.status(400).json({ error: 'Event name is required' });
+    }
+  
+    try {
+        
+      const eventRef = db.ref(`Events/ID/${eventName}`);
+      
+      const snapshot = await eventRef.once('value');
+      if (!snapshot.exists()) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+  
+      await eventRef.remove();
+  
+      return res.status(200).json({ message: 'Event deleted successfully' });
+    } catch (err) {
+      console.error('Error deleting event:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+
 /*
 app.put('/event/:id', async (req, res) => {
     const { id } = req.params;
@@ -168,6 +195,8 @@ app.put('/event/:id', async (req, res) => {
     }
   });
 */
+  
+
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

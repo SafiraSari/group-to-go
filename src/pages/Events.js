@@ -136,6 +136,23 @@ const getCountdown = (dateStr, timeStr) => {
     }
   };
 
+  const handleEventDelete = async (eventName) => {
+    try {
+      const response = await fetch(`http://localhost:3500/event/${eventName}`, {
+        method: 'DELETE',
+      });
+  
+      if (response.ok) {
+        setEvents(prev => prev.filter(e => e.eventName !== eventName));
+      } else {
+        const error = await response.json();
+        console.error('Failed to delete event:', error);
+      }
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    }
+  };
+  
   const handleSaveEvent = async () => {
     // Save the edited event back to the database
     const updatedEvent = { ...selectedEvent, category };
@@ -359,8 +376,8 @@ const getCountdown = (dateStr, timeStr) => {
 
               <div className="option-button">
                 <Button label="Edit" onClick={() => setIsEditing(true)} />
-                <Button label="Delete" onClick={() => { 
-                  {/* Method to delete from db */}
+                <Button label="Delete" variant = "red" onClick={() => { 
+                  {handleEventDelete(selectedEvent.eventName)}
                 }} />
               </div>
             </>
