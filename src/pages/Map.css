@@ -1,6 +1,6 @@
 @import url("../constants.css");
 
-.map-header .map-title {
+.map-header-title {
     text-align: center;
     text-transform: uppercase;
     font-size: 30px; 
@@ -13,7 +13,7 @@
     margin: 20px 0;
 }
    
-.map-header .map-title:after, .map-title:before {
+.map-header-title:after , .map-header-title:before {
     content: " ";
     display: block;
     border-bottom: 2px solid var(--SANDY);
@@ -53,4 +53,21 @@
     margin: 20px 0;
     position: relative;
     z-index: 1000; /* Ensure dropdown appears above map */
+  }
+  .favorite-btn{
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    left:200px;
+    display: flex;
+  }
+  .custom-infowindow p{
+    font-size: 1rem;
+    margin: 0;
+    padding: 0;
+    color:var(--CARAMEL);
   }

@@ -1,6 +1,5 @@
 import { Autocomplete } from "@react-google-maps/api";
 import Input from "../components/Input"; 
-import searchicon from "../assets/searchicon.png";
 import { useRef, useState } from "react";
 import "./SearchBar.css";
 
@@ -48,25 +47,9 @@ export default function SearchBar({ onPlaceSelected }) {
     }
   };
 
-  const handleManualSearch = () => {
-    const query = inputRef.current?.value;
-    console.log("Manual search triggered with:", query);
-
-    if (autocompleteLoaded && autocompleteRef.current) {
-      // Trigger place_changed manually 
-      const place = autocompleteRef.current.getPlace();
-      if (place && place.geometry) {
-        onPlaceSelected(place);
-        return;
-      }
-    }
-
-    fallbackTextSearch(query);
-  };
-
   return (
     <div className="searchbar-container">
-      <Autocomplete onLoad={handleLoad} options={{fields: ["name", "formatted_address", "geometry", "rating", "price_level"]}}>
+      <Autocomplete onLoad={handleLoad} options={{fields: ["name", "formatted_address", "geometry", "rating", "price_level", "place_id"]}}>
         <Input
           type="text"
           placeholder="Search a place"
@@ -74,10 +57,6 @@ export default function SearchBar({ onPlaceSelected }) {
           className="search-input"
         />
       </Autocomplete>
-
-      <button onClick={handleManualSearch} className="searchbutton">
-        <img src={searchicon} alt="Search" className="searchimg" />
-      </button>
     </div>
   );
 }

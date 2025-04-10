@@ -2,16 +2,15 @@
     position: relative;
     display: flex;
     width: 100%;
-    max-width: 600px; /* Adjust as needed */
+    max-width: 600px; 
     margin: 0 auto;
   }
   
-  /* Input field styling */  
   /* Search button positioning */
   .searchbutton {
     position: absolute;
-    right: -100px; /* Moves button outside the input */
-    top: 55%;
+    right: -100px; 
+    top: 45%;
     transform: translateY(-50%);
     border: none;
     background: none;

@@ -21,7 +21,7 @@ function App() {
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/polls" element={<Polls />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/search" element={<MapEvents/>} />
+          <Route path="/map" element={<MapEvents/>} />
           <Route path="/signup" element={<SignupPage />} />
         </Routes>
       </div>
