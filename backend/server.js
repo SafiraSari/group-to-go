@@ -60,13 +60,40 @@ app.post('/login', async(req, res) => {
             return res.status(401).json({ error: 'Incorrect password' });
         }
 
-        return res.status(200).json({ message: 'Login successful!' });
+        return res.status(200).json({ message: 'Login successful!', username });
     } catch (err) {
         console.error('Login error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
+// Create group route
+app.post('/groups', async (req, res) => {
+    const { name, description, code, createdBy } = req.body;
 
+    if (!name || !description || !code || !createdBy) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    try {
+        const groupsRef = db.ref('groups');
+        const newGroupRef = groupsRef.push(); // Auto-generate key
+        const groupData = {
+            name,
+            description,
+            code,
+            createdBy,
+            members: [createdBy],
+            createdAt: Date.now()
+        };
+
+        await newGroupRef.set(groupData);
+
+        return res.status(200).json({ message: 'Group created successfully!', groupId: newGroupRef.key });
+    } catch (err) {
+        console.error('Group creation error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
