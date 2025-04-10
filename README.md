@@ -22,7 +22,6 @@ Coordinating events can raise hurdles, such as tracking everyone’s availabilit
 
 [![Figma Preview](https://github.com/user-attachments/assets/272b5f09-d0ae-4885-a9eb-1389ae231778)](https://www.figma.com/design/kMO6GXiHJY0QL8dH1002WM/GTG?node-id=0-1&t=iApQpGb2HTSXWh0m-1)
 
-
 ## 💻 Installation
 
 ### Step 1: Clone the Repository
