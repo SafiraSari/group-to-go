@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import NavBar from '../components/NavBar';
-import Button from '../components/Button';
-import Modal from '../components/Modal';
-import Input from '../components/Input';
+import NavBar from "../components/NavBar";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import Modal from "../components/Modal";
 import './Groups.css';
 
 const Groups = () => {
-  const username = localStorage.getItem('username'); // Get logged-in user
+  const username = localStorage.getItem('username');
   const [modalOpen, setModalOpen] = useState(false);
   const [mode, setMode] = useState('');
   const [groupName, setGroupName] = useState('');
@@ -15,21 +15,18 @@ const Groups = () => {
   const [groups, setGroups] = useState([]);
   const [expandedGroupIndex, setExpandedGroupIndex] = useState(null);
 
+  // Load groups for user
   useEffect(() => {
     const fetchGroups = async () => {
       try {
         const res = await fetch(`http://localhost:3500/groups/user/${username}`);
         const data = await res.json();
-        if (res.ok) {
-          setGroups(data);
-        } else {
-          console.error('Failed to load groups:', data.error);
-        }
+        if (res.ok) setGroups(data);
+        else console.error('Failed to load groups:', data.error);
       } catch (err) {
         console.error('Error fetching groups:', err);
       }
     };
-
     fetchGroups();
   }, [username]);
 
@@ -86,10 +83,8 @@ const Groups = () => {
         });
 
         const data = await res.json();
-
         if (res.ok) {
           alert(`Successfully joined group!`);
-          // Refresh group list
           const updatedGroups = await fetch(`http://localhost:3500/groups/user/${username}`);
           const updatedData = await updatedGroups.json();
           setGroups(updatedData);
@@ -122,6 +117,7 @@ const Groups = () => {
       alert('Error disbanding group');
     }
   };
+
   const kickMember = async (group, member) => {
     try {
       const res = await fetch(`http://localhost:3500/groups/${group.id}/kick`, {
@@ -129,15 +125,14 @@ const Groups = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetUsername: member }),
       });
-  
       const data = await res.json();
-  
       if (res.ok) {
         alert(data.message);
-        // Remove member locally from state
         setGroups((prev) =>
           prev.map((g) =>
-            g.id === group.id ? { ...g, members: g.members.filter((m) => m !== member) } : g
+            g.id === group.id
+              ? { ...g, members: g.members.filter((m) => m !== member) }
+              : g
           )
         );
       } else {
@@ -148,6 +143,7 @@ const Groups = () => {
       alert('Error kicking member');
     }
   };
+
   const leaveGroup = async (group) => {
     try {
       const res = await fetch(`http://localhost:3500/groups/${group.id}/leave`, {
@@ -170,7 +166,6 @@ const Groups = () => {
 
   const toggleGroupDetails = (index) => {
     setExpandedGroupIndex(expandedGroupIndex === index ? null : index);
-    
   };
 
   return (
@@ -188,7 +183,9 @@ const Groups = () => {
 
         {modalOpen && (
           <Modal onSubmit={handleSubmit} onCancel={handleCloseModal} onClose={handleCloseModal}>
-            <h1>{mode === 'create' ? 'Create a New Group' : 'Join an Existing Group'}</h1>
+            <h1 className="modal-title">
+              {mode === 'create' ? 'Create a New Group' : 'Join an Existing Group'}
+            </h1>
             {mode === 'create' ? (
               <>
                 <Input
@@ -252,7 +249,6 @@ const Groups = () => {
                         </li>
                       ))}
                     </ul>
-
 
                     <div style={{ marginTop: '1rem' }}>
                       {username === group.createdBy ? (
