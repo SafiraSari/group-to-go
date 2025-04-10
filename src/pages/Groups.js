@@ -234,20 +234,19 @@ const Groups = () => {
                   <div className="group-details">
                     <p><strong>Description:</strong> {group.description}</p>
                     <p><strong>Members:</strong></p>
-                    <ul className="member-list">
+                    <ul className="group-members-list">
                       {group.members?.map((member, i) => (
-                        <li key={i} className="member-item">
-                          <span>{member}</span>
+                        <li key={i} className="group-member-row">
+                          <span className="group-member-name">{member}</span>
                           {username === group.createdBy && member !== username && (
                             <button
                               className="kick-button"
-                              title="Kick member"
-                              onClick={() => {
-                                const confirmKick = window.confirm(`Kick "${member}" from ${group.name}?`);
-                                if (confirmKick) kickMember(group, member);
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                kickMember(group, member);
                               }}
                             >
-                              ❌
+                              Kick
                             </button>
                           )}
                         </li>

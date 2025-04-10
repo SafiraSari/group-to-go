@@ -44,8 +44,10 @@
   
   .group-code {
     font-size: 0.9rem;
-    color: var(--SANDY);
+    font-weight: bold;
+    color: var(--CARAMEL);
   }
+  
   
   .group-details {
     margin-top: 1rem;
@@ -73,16 +75,45 @@
   }
   
   .kick-button {
-    background: transparent;
+    background-color: var(--RED);
+    color: white;
     border: none;
-    color: red;
-    font-size: 1.1rem;
+    border-radius: 6px;
+    padding: 4px 10px;
     cursor: pointer;
-    transition: 0.2s ease;
+    font-size: 0.8rem;
+    margin-left: 10px;
+    transition: background-color 0.2s ease;
   }
   
   .kick-button:hover {
-    transform: scale(1.1);
-    color: darkred;
+    background-color:var(--RED);
   }
   
+  .group-members-list {
+    padding: 0;
+    margin-top: 10px;
+    list-style-type: none;
+    border-top: 1px solid #ddd;
+  }
+  
+  .group-member-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 10px;
+    border-bottom: 1px solid #eee;
+    margin: 0;
+    background-color: #fdfdfd;
+    transition: background-color 0.3s ease;
+  }
+  
+  .group-member-row:hover {
+    background-color: #f9f5f1;
+  }
+  
+  .group-member-name {
+    font-weight: 500;
+    color: #333;
+    padding-left: 5px;
+  }
