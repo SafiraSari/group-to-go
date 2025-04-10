@@ -20,32 +20,36 @@ const Events = () => {
   const [groupID, setGroupID] = useState("");
   const [agenda, setAgenda] = useState(["", ""]);
   const [agendaError, setAgendaError] = useState("");
-  const [id, setID] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [eventCountdowns, setEventCountdowns] = useState({});
   const [selectedCountdown, setSelectedCountdown] = useState("");
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
-  /*
-  const [events, setEvents] = useState([
-    { id: 1, name: "Pizza Party Poll", category: "Food", createdAt: "2025-04-01" },
-    { id: 2, name: "Best Activity?", category: "Activity", createdAt: "2025-04-02" },
-  ]);
-*/
-  const getCountdown = (dateString) => {
-    const now = new Date();
-    const eventDate = new Date(dateString);
-    const diff = eventDate - now;
 
-    if (diff <= 0) return "Started";
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
-    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-  };
+const getCountdown = (dateStr, timeStr) => {
+  if (!dateStr) return "Date not set";
+  
+  // Combine date and time (or use midnight if no time provided)
+  const dateTimeStr = timeStr ? `${dateStr}T${timeStr}:00` : `${dateStr}T00:00:00`;
+  const eventDateTime = new Date(dateTimeStr);
+  const currentTime = new Date();
+  
+  // Calculate time difference in milliseconds
+  const timeDiff = eventDateTime - currentTime;
+  
+  // Check if the event is in the past
+  if (timeDiff < 0) {
+    return "Event has passed";
+  }
+  
+  // Calculate days, hours, minutes
+  const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  // Format the countdown
+  return `${days}d ${hours}h ${minutes}m`;
+};
 
   useEffect(() => {
     if (!selectedEvent) return;
@@ -65,6 +69,7 @@ const Events = () => {
       eventName,
       date,
       groupID,
+      category,
       time,
       location,
       agenda: agenda.filter(item => item.trim() !== "")
@@ -87,7 +92,7 @@ const Events = () => {
       }
   
       console.log('Event created successfully:', data);
-      setEvents(prev => [...prev, data]); // Or whatever data your backend returns (e.g., with `id`)
+      setEvents(prev => [...prev, data]); 
   
       // Reset form
       setEventName("");
@@ -101,6 +106,38 @@ const Events = () => {
       setModalOpen(false);
     } catch (error) {
       console.error('Error creating event:', error);
+    }
+  };
+
+  const handleSaveEvent = async () => {
+    // Save the edited event back to the database
+    const updatedEvent = { ...selectedEvent, category };
+
+    try {
+      const response = await fetch(`http://localhost:3500/event/${selectedEvent.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedEvent),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update the state to reflect the changes
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.id === selectedEvent.id ? data : event
+          )
+        );
+        setIsEditing(false);
+        setSelectedEvent(null);
+      } else {
+        console.error("Failed to update event:", data.error);
+      }
+    } catch (error) {
+      console.error("Error updating event:", error);
     }
   };
 
@@ -134,10 +171,6 @@ const Events = () => {
       const interval = setInterval(updateCountdown, 1000);
       return () => clearInterval(interval);
     }, [selectedEvent]);
-
-
-
-
 
   return (
     <>
@@ -185,6 +218,7 @@ const Events = () => {
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
+              isRequired
             />
 
             <Input
@@ -192,6 +226,7 @@ const Events = () => {
               placeholder="Where is it happening?"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              isRequired
             />
 
             <h3>Category: <strong>{category}</strong></h3>
@@ -226,10 +261,10 @@ const Events = () => {
               }}
             >
               <h3>{event.eventName}</h3>
-              <p><strong>Category:</strong> {event.category}</p>
+              <p><strong>Category:</strong> {event.Category}</p>
               <p><strong>Date:</strong> {event.Date}</p>
               <p className="countdown">
-                <strong>Countdown:</strong> {getCountdown(event.Date)}
+                <strong>Countdown:</strong> {getCountdown(event.Date, event.Time)}
               </p>
             </li>
           ))}
@@ -242,13 +277,21 @@ const Events = () => {
               <h2>Edit Event</h2>
               <Input
                 label="Event Name"
-                value={selectedEvent.name}
+                value={selectedEvent.eventName}
                 onChange={(e) =>
                   setSelectedEvent({ ...selectedEvent, name: e.target.value })
                 }
               />
-              <h3>Category: <strong>{category}</strong></h3>
-              <div className="option-button">
+              <Input
+                label="GroupID"
+                value={selectedEvent.GroupID}
+                onChange={(e) =>
+                  setSelectedEvent({ ...selectedEvent, name: e.target.value })
+                }
+              />
+
+            <h3>Category: <strong>{category}</strong></h3>
+            <div className="option-button">
               {categories.map((cat, index) => (
                 <Button
                   key={index}
@@ -260,34 +303,33 @@ const Events = () => {
               <Input
                 label="Date"
                 type="date"
-                value={selectedEvent.createdAt}
+                value={selectedEvent.Date}
                 onChange={(e) =>
                   setSelectedEvent({ ...selectedEvent, createdAt: e.target.value })
                 }
               />
+
+            <Input
+              label="Location"
+              placeholder="Where is it happening?"
+              value={selectedEvent.Location}
+              onChange={(e) =>
+                setSelectedEvent({ ...selectedEvent, createdAt: e.target.value })
+              }
+            />
+
               <div className="option-button">
-                <Button
-                  label="Save"
-                  onClick={() => {
-                    setEvents((prev) =>
-                      prev.map((e) =>
-                        e.id === selectedEvent.id ? selectedEvent : e
-                      )
-                    );
-                    setIsEditing(false);
-                    setSelectedEvent(null);
-                  }}
-                />
+                <Button label="Save" onClick={() => handleSaveEvent()} />
                 <Button label="Cancel" onClick={() => setIsEditing(false)} />
               </div>
             </>
           ) : (
             
             <>
-              <h2>{selectedEvent.name}</h2>
-              <p><strong>Category:</strong> {selectedEvent.category}</p>
-              <p><strong>Date:</strong> {selectedEvent.createdAt}</p>
-              <p><strong>Countdown:</strong> {selectedCountdown}</p>
+              <h2>{selectedEvent.eventName}</h2>
+              <p><strong>Category:</strong> {selectedEvent.Category}</p>
+              <p><strong>Date:</strong> {selectedEvent.Date}</p>
+              <p><strong>Countdown:</strong> {getCountdown(selectedEvent.Date, selectedEvent.Time)}</p>
 
               <div className="option-button">
                 <Button label="Edit" onClick={() => setIsEditing(true)} />

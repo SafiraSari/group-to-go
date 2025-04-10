@@ -68,7 +68,7 @@ app.post('/login', async(req, res) => {
 });
 
 app.post('/event', async (req, res) => {
-    const { date, groupID, location, eventName,time } = req.body;
+    const { date, groupID, location, eventName,time, category } = req.body;
 
     //DEBUGGING TEXT
     /*
@@ -80,7 +80,7 @@ app.post('/event', async (req, res) => {
     */
 
     // Validate required fields
-    if (!date || !groupID || !location || !eventName|| !time) {
+    if (!date || !groupID || !location || !eventName|| !time || !category) {
         return res.status(400).json({ error: 'All fields (id, date, groupID, location, eventName, time) are required' });
     }
 
@@ -94,6 +94,7 @@ app.post('/event', async (req, res) => {
             GroupID: groupID,
             Location: location,
             eventName: eventName,
+            Category: category,
             Time: time
         });
 
