@@ -24,14 +24,15 @@ const Events = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventCountdowns, setEventCountdowns] = useState({});
-
   const [selectedCountdown, setSelectedCountdown] = useState("");
-
+  const [error, setError] = useState(null);
+  const [events, setEvents] = useState([]);
+  /*
   const [events, setEvents] = useState([
     { id: 1, name: "Pizza Party Poll", category: "Food", createdAt: "2025-04-01" },
     { id: 2, name: "Best Activity?", category: "Activity", createdAt: "2025-04-02" },
   ]);
-
+*/
   const getCountdown = (dateString) => {
     const now = new Date();
     const eventDate = new Date(dateString);
@@ -60,8 +61,6 @@ const Events = () => {
 
   const handleCreateEvent = async () => {
     
-    console.log("Confirm button clicked");
-
     const newEvent = {
       eventName,
       date,
@@ -104,7 +103,42 @@ const Events = () => {
       console.error('Error creating event:', error);
     }
   };
+
+    const fetchEvents = async () => {
+        try {
+            const response = await fetch('http://localhost:3500/events');
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch events');
+            }
+
+            setEvents(data.data);  // Store the list of events in the state
+        } catch (error) {
+            setError(error.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+
+    useEffect(() => {
+      if (!selectedEvent) return;
   
+      const updateCountdown = () => {
+        setSelectedCountdown(getCountdown(selectedEvent.createdAt));
+      };
+  
+      updateCountdown();
+      const interval = setInterval(updateCountdown, 1000);
+      return () => clearInterval(interval);
+    }, [selectedEvent]);
+
+
+
+
+
   return (
     <>
       <NavBar />
@@ -182,24 +216,24 @@ const Events = () => {
         )}
 
       <ul className="event-list-items">
-        {events.map((event) => (
-          <li
-            key={event.id}
-            className="event-card"
-            onClick={() => {
-              setSelectedEvent(event); // opens modal with event details
-              setIsEditing(false);     // optional: make sure you're not in edit mode
-            }}
-          >
-            <h3>{event.name}</h3>
-            <p><strong>Category:</strong> {event.category}</p>
-            <p><strong>Date:</strong> {event.createdAt}</p>
-
-            <p className="countdown">
-              <strong>Countdown:</strong> {getCountdown(event.CreatedAt)}</p>
-          </li>
-        ))}
-      </ul>
+          {events.map((event) => (
+            <li
+              key={event.id}
+              className="event-card"
+              onClick={() => {
+                setSelectedEvent(event); // opens modal with event details
+                setIsEditing(false);     // optional: make sure you're not in edit mode
+              }}
+            >
+              <h3>{event.eventName}</h3>
+              <p><strong>Category:</strong> {event.category}</p>
+              <p><strong>Date:</strong> {event.Date}</p>
+              <p className="countdown">
+                <strong>Countdown:</strong> {getCountdown(event.Date)}
+              </p>
+            </li>
+          ))}
+        </ul>
 
       {selectedEvent && (
         <Modal onClose={() => { setSelectedEvent(null); setIsEditing(false); }}>

@@ -78,7 +78,7 @@ app.post('/event', async (req, res) => {
     console.log("Location : " + location);
     console.log("Event Name : " + eventName);
     */
-   
+
     // Validate required fields
     if (!date || !groupID || !location || !eventName|| !time) {
         return res.status(400).json({ error: 'All fields (id, date, groupID, location, eventName, time) are required' });
@@ -109,6 +109,39 @@ app.post('/event', async (req, res) => {
         });
     } catch (err) {
         console.error('Error writing event:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/events', async (req, res) => {
+    try {
+        // Reference to the entire Events node
+        const eventsRef = db.ref('Events/ID');
+
+        // Get the events data from Firebase
+        const snapshot = await eventsRef.once('value');
+        
+        // Check if any events exist
+        if (!snapshot.exists()) {
+            return res.status(404).json({ error: 'No events found' });
+        }
+
+        // Get the events data as an object
+        const eventsData = snapshot.val();
+
+        // Return the events in an array format
+        const events = Object.keys(eventsData).map(id => ({
+            id,
+            ...eventsData[id]
+        }));
+
+        // Send the event data in the response
+        return res.status(200).json({
+            message: 'Events retrieved successfully',
+            data: events
+        });
+    } catch (err) {
+        console.error('Error retrieving events:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
