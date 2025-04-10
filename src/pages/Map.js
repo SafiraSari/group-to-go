@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import NavBar from "../components/NavBar";
 import SearchBar from "../components/SearchBar";
-import { APIProvider, Map, AdvancedMarker, InfoWindow } from "@vis.gl/react-google-maps";
+import { APIProvider, Map, AdvancedMarker, InfoWindow, Pin, Autocomplete } from "@vis.gl/react-google-maps";
 import "./Map.css";
 
 const MapEvents = () => {
@@ -11,6 +11,7 @@ const MapEvents = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [clickedPosition, setClickedPosition] = useState(null);
   const geocoderRef = useRef(null);
+  const [open, setOpen] = useState(false);
   const placesServiceRef = useRef(null);
 
   // Initialize services when map is ready
@@ -57,19 +58,19 @@ const MapEvents = () => {
 
   const handlePlaceSelected = (place) => {
     if (!place.geometry) return;
-  
+
     const location = place.geometry.location;
     const newPosition = {
       lat: location.lat(),
       lng: location.lng()
     };
-  
+
     setClickedPosition(newPosition);
-  
+
     if (mapRef.current) {
       mapRef.current.panTo(newPosition);
     }
-  
+
     if (placesServiceRef.current) {
       placesServiceRef.current.getDetails(
         { placeId: place.place_id || '' },
@@ -124,10 +125,11 @@ const MapEvents = () => {
           apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
           libraries={["places", "geocoding"]}
         >
+
           {userLocation && (
             <>
               <div className="map-search">
-                <SearchBar 
+                <SearchBar
                   onPlaceSelected={handlePlaceSelected}
                   mapRef={mapRef}
                 />
@@ -136,10 +138,26 @@ const MapEvents = () => {
                 ref={mapRef}
                 defaultZoom={13}
                 defaultCenter={userLocation}
+                mapId={process.env.REACT_APP_GOOGLE_MAPS_MAP_ID}
                 style={{ width: "100%", height: "800px" }}
                 onClick={handleMapClick}
                 onLoad={handleMapLoad}
               >
+                {/* User location marker */}
+                <AdvancedMarker
+                  position={userLocation}
+                  onClick={() => {
+                    setClickedPosition(userLocation);
+                    setOpen(true);
+                  }}
+                >
+                  <Pin
+                    background={"var(--RED)"}
+                    borderColor={"var(--CARAMEL)"}
+                    glyphColor={"var(--OFF_WHITE)"}
+                  />
+                </AdvancedMarker>
+
                 {clickedPosition && (
                   <AdvancedMarker position={clickedPosition}>
                     {selectedPlace && (
@@ -155,7 +173,7 @@ const MapEvents = () => {
                               <span>💰 {'$'.repeat(selectedPlace.priceLevel)}</span>
                             )}
                           </div>
-                          <button 
+                          <button
                             className={`favorite-btn ${isFavorite ? 'favorited' : ''}`}
                             onClick={() => setIsFavorite(!isFavorite)}
                           >
