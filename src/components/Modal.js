@@ -2,7 +2,7 @@ import React from 'react';
 import Button from "../components/Button"
 import './Modal.css';
 
-const Modal = ({ onSubmit, onCancel, onClose, children }) => {
+const Modal = ({ onSubmit, onCancel, onClose, children, hideButton = false }) => {
   return (
     <div 
       className='modal-container' 
@@ -20,14 +20,15 @@ const Modal = ({ onSubmit, onCancel, onClose, children }) => {
         <div className='modal-content'>
           {children}
         </div>
-
+      {!hideButton &&(
         <div className='modal-footer'>
           <Button label="Cancel" variant="red" onClick={() => onCancel()} />
           <Button label="Confirm" variant="green" onClick={() => onSubmit()} />
         </div>
+      )}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Modal;

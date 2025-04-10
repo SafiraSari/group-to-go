@@ -25,6 +25,31 @@ const Events = () => {
   const [selectedCountdown, setSelectedCountdown] = useState("");
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
+  const [id, setID] = useState([]);
+  const [temp,setTemp] = useState([]);
+
+  const getStatus = (dateStr, timeStr) => {
+    if (!dateStr) return "No date set";
+  
+    const dateTimeStr = timeStr ? `${dateStr}T${timeStr}:00` : `${dateStr}T00:00:00`;
+    const eventDateTime = new Date(dateTimeStr);
+    const now = new Date();
+  
+    if (eventDateTime < now) {
+      return "Past";
+    }
+  
+    const diffInMs = eventDateTime - now;
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+  
+    if (diffInHours <= 24) {
+      return "Soon";
+    }
+  
+    return "Upcoming";
+  };
+  
+
 
 const getCountdown = (dateStr, timeStr) => {
   if (!dateStr) return "Date not set";
@@ -51,6 +76,8 @@ const getCountdown = (dateStr, timeStr) => {
   return `${days}d ${hours}h ${minutes}m`;
 };
 
+
+
   useEffect(() => {
     if (!selectedEvent) return;
 
@@ -64,7 +91,7 @@ const getCountdown = (dateStr, timeStr) => {
   }, [selectedEvent]);
 
   const handleCreateEvent = async () => {
-    
+
     const newEvent = {
       eventName,
       date,
@@ -172,6 +199,12 @@ const getCountdown = (dateStr, timeStr) => {
       return () => clearInterval(interval);
     }, [selectedEvent]);
 
+    const generateEventId = () => {
+      const timestamp = Date.now(); // Current timestamp in milliseconds
+      const randomValue = Math.floor(Math.random() * 1000); // Random number between 0 and 999
+      return `${timestamp}-${randomValue}`;
+    };
+    
   return (
     <>
       <NavBar />
@@ -266,65 +299,58 @@ const getCountdown = (dateStr, timeStr) => {
               <p className="countdown">
                 <strong>Countdown:</strong> {getCountdown(event.Date, event.Time)}
               </p>
+              <p> Status: {getStatus(event.Date, event.Time)}</p>
             </li>
           ))}
         </ul>
 
       {selectedEvent && (
-        <Modal onClose={() => { setSelectedEvent(null); setIsEditing(false); }}>
+        <Modal hideButton onClose={() => { setSelectedEvent(null); setIsEditing(false); }}>
+          
           {isEditing ? (
             <>
               <h2>Edit Event</h2>
               <Input
                 label="Event Name"
                 value={selectedEvent.eventName}
-                onChange={(e) =>
-                  setSelectedEvent({ ...selectedEvent, name: e.target.value })
-                }
+                placeholder={selectedEvent.eventName}
+                onChange={(e) => setEventName(e.target.value)}  // Set the event name properly
               />
               <Input
                 label="GroupID"
-                value={selectedEvent.GroupID}
-                onChange={(e) =>
-                  setSelectedEvent({ ...selectedEvent, name: e.target.value })
-                }
+                value={groupID}
+                placeholder={selectedEvent.groupID}
+                onChange={(e) => setGroupID(e.target.value)}
               />
-
-            <h3>Category: <strong>{category}</strong></h3>
-            <div className="option-button">
-              {categories.map((cat, index) => (
-                <Button
-                  key={index}
-                  label={cat}
-                  onClick={() => setCategory(cat)}
-                />
-              ))}
-            </div>
+              <h3>Category: <strong>{category}</strong></h3>
+              <div className="option-button">
+                {categories.map((cat, index) => (
+                  <Button
+                    key={index}
+                    label={cat}
+                    onClick={() => setCategory(cat)}
+                  />
+                ))}
+              </div>
               <Input
                 label="Date"
                 type="date"
-                value={selectedEvent.Date}
-                onChange={(e) =>
-                  setSelectedEvent({ ...selectedEvent, createdAt: e.target.value })
-                }
+                placeholder={selectedEvent.date}
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
               />
-
-            <Input
-              label="Location"
-              placeholder="Where is it happening?"
-              value={selectedEvent.Location}
-              onChange={(e) =>
-                setSelectedEvent({ ...selectedEvent, createdAt: e.target.value })
-              }
-            />
-
+              <Input
+                label="Location"
+                placeholder={selectedEvent.location}
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
               <div className="option-button">
                 <Button label="Save" onClick={() => handleSaveEvent()} />
                 <Button label="Cancel" onClick={() => setIsEditing(false)} />
               </div>
             </>
           ) : (
-            
             <>
               <h2>{selectedEvent.eventName}</h2>
               <p><strong>Category:</strong> {selectedEvent.Category}</p>
@@ -333,10 +359,10 @@ const getCountdown = (dateStr, timeStr) => {
 
               <div className="option-button">
                 <Button label="Edit" onClick={() => setIsEditing(true)} />
-                <Button label="Delete" onClick={() => { setEvents(events.filter((e) => e.id !== selectedEvent.id)); setSelectedEvent(null);}}
-                />
+                <Button label="Delete" onClick={() => { 
+                  {/* Method to delete from db */}
+                }} />
               </div>
-
             </>
           )}
         </Modal>

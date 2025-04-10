@@ -68,7 +68,7 @@ app.post('/login', async(req, res) => {
 });
 
 app.post('/event', async (req, res) => {
-    const { date, groupID, location, eventName,time, category } = req.body;
+    const { date, groupID, location, eventName,time, category} = req.body;
 
     //DEBUGGING TEXT
     /*
@@ -78,7 +78,7 @@ app.post('/event', async (req, res) => {
     console.log("Location : " + location);
     console.log("Event Name : " + eventName);
     */
-
+    
     // Validate required fields
     if (!date || !groupID || !location || !eventName|| !time || !category) {
         return res.status(400).json({ error: 'All fields (id, date, groupID, location, eventName, time) are required' });
@@ -105,7 +105,7 @@ app.post('/event', async (req, res) => {
                 date,
                 groupID,
                 location,
-                eventName
+                eventName,
             }
         });
     } catch (err) {
@@ -146,8 +146,28 @@ app.get('/events', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
-
-
+/*
+app.put('/event/:id', async (req, res) => {
+    const { id } = req.params;
+    const updatedEvent = req.body;
+  
+    try {
+      // Update the event in the database
+      const result = await db.collection('events').updateOne(
+        { _id: ObjectId(id) },
+        { $set: updatedEvent }
+      );
+  
+      if (result.modifiedCount === 0) {
+        return res.status(404).json({ error: 'Event not found or not modified' });
+      }
+  
+      res.status(200).json(updatedEvent);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update event' });
+    }
+  });
+*/
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
