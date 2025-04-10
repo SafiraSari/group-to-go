@@ -67,6 +67,53 @@ app.post('/login', async(req, res) => {
     }
 });
 
+app.post('/event', async (req, res) => {
+    const { date, groupID, location, eventName,time } = req.body;
+
+    //DEBUGGING TEXT
+    /*
+    console.log("Time : " + time);
+    console.log("Date : " + date);
+    console.log("GroupID : " + groupID);
+    console.log("Location : " + location);
+    console.log("Event Name : " + eventName);
+    */
+   
+    // Validate required fields
+    if (!date || !groupID || !location || !eventName|| !time) {
+        return res.status(400).json({ error: 'All fields (id, date, groupID, location, eventName, time) are required' });
+    }
+
+    try {
+        // Reference to Events/ID/{id}
+        const eventRef = db.ref(`Events/ID/${eventName}`);
+
+        // Write the event data
+        await eventRef.set({
+            Date: date,
+            GroupID: groupID,
+            Location: location,
+            eventName: eventName,
+            Time: time
+        });
+
+        // Send response after writing to the database
+        return res.status(201).json({
+            message: 'Event created successfully',
+            data: {
+                date,
+                groupID,
+                location,
+                eventName
+            }
+        });
+    } catch (err) {
+        console.error('Error writing event:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

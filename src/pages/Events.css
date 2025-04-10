@@ -63,6 +63,11 @@
   .event-card:hover {
     transform: scale(1.01);
   }
+
+  .countdown {
+    font-size: 20px; /* Increases Font Size*/
+    text-align: center;
+  }
   
   
   

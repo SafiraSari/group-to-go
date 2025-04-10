@@ -17,9 +17,10 @@ const Events = () => {
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [category, setCategory] = useState(categories[0]);
+  const [groupID, setGroupID] = useState("");
   const [agenda, setAgenda] = useState(["", ""]);
   const [agendaError, setAgendaError] = useState("");
-
+  const [id, setID] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventCountdowns, setEventCountdowns] = useState({});
@@ -57,31 +58,53 @@ const Events = () => {
     return () => clearInterval(interval);
   }, [selectedEvent]);
 
-  const handleCreateEvent = () => {
-    const eventData = {
-      name: eventName,
+  const handleCreateEvent = async () => {
+    
+    console.log("Confirm button clicked");
+
+    const newEvent = {
+      eventName,
       date,
+      groupID,
       time,
       location,
-      notes,
-      category,
       agenda: agenda.filter(item => item.trim() !== "")
     };
-
-    console.log("Event Created:", eventData);
-
-    // Reset form
-    setEventName("");
-    setDate("");
-    setTime("");
-    setLocation("");
-    setNotes("");
-    setCategory(categories[0]);
-    setAgenda(["", ""]);
-    setAgendaError("");
-    setModalOpen(false);
+  
+    try {
+      const response = await fetch('http://localhost:3500/event', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newEvent),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        console.error('Error:', data.error || 'Failed to create event');
+        return;
+      }
+  
+      console.log('Event created successfully:', data);
+      setEvents(prev => [...prev, data]); // Or whatever data your backend returns (e.g., with `id`)
+  
+      // Reset form
+      setEventName("");
+      setDate("");
+      setTime("");
+      setLocation("");
+      setNotes("");
+      setCategory(categories[0]);
+      setAgenda(["", ""]);
+      setAgendaError("");
+      setModalOpen(false);
+    } catch (error) {
+      console.error('Error creating event:', error);
+    }
   };
-
+  
   return (
     <>
       <NavBar />
@@ -107,7 +130,14 @@ const Events = () => {
               onChange={(e) => setEventName(e.target.value)}
               isRequired
             />
-
+            <Input
+              label="GroupID"
+              placeholder="Enter the GroupID"
+              value={groupID}
+              onChange={(e) => setGroupID(e.target.value)}
+              isRequired
+            />
+          
             <Input
               label="Date"
               type="date"
@@ -164,7 +194,9 @@ const Events = () => {
             <h3>{event.name}</h3>
             <p><strong>Category:</strong> {event.category}</p>
             <p><strong>Date:</strong> {event.createdAt}</p>
-            <p><strong>Countdown:</strong> {getCountdown(event.CreatedAt)}</p>
+
+            <p className="countdown">
+              <strong>Countdown:</strong> {getCountdown(event.CreatedAt)}</p>
           </li>
         ))}
       </ul>
@@ -233,17 +265,7 @@ const Events = () => {
           )}
         </Modal>
 )}
-
-
-
-
-      
-
-
       </div>
-
-
-      
     </>
   );
 };
