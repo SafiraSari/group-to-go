@@ -20,7 +20,6 @@ const Groups = () => {
       try {
         const res = await fetch(`http://localhost:3500/groups/user/${username}`);
         const data = await res.json();
-
         if (res.ok) {
           setGroups(data);
         } else {
@@ -52,11 +51,10 @@ const Groups = () => {
   const handleSubmit = async () => {
     if (mode === 'create') {
       const code = generateGroupCode();
-
       const groupPayload = {
         name: groupName,
         description: groupDesc,
-        code: code,
+        code,
         createdBy: username,
       };
 
@@ -69,7 +67,7 @@ const Groups = () => {
 
         const data = await res.json();
         if (res.ok) {
-          const newGroup = { ...groupPayload, members: [username] };
+          const newGroup = { ...groupPayload, id: data.groupId, members: [username] };
           setGroups((prev) => [...prev, newGroup]);
           alert(`Group "${groupName}" created!\nCode: ${code}`);
         } else {
@@ -91,7 +89,7 @@ const Groups = () => {
 
         if (res.ok) {
           alert(`Successfully joined group!`);
-          // Fetch the updated list after joining
+          // Refresh group list
           const updatedGroups = await fetch(`http://localhost:3500/groups/user/${username}`);
           const updatedData = await updatedGroups.json();
           setGroups(updatedData);
@@ -107,8 +105,72 @@ const Groups = () => {
     handleCloseModal();
   };
 
+  const disbandGroup = async (group) => {
+    try {
+      const res = await fetch(`http://localhost:3500/groups/${group.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        setGroups((prev) => prev.filter(g => g.id !== group.id));
+      } else {
+        alert('Failed to disband group: ' + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error disbanding group');
+    }
+  };
+  const kickMember = async (group, member) => {
+    try {
+      const res = await fetch(`http://localhost:3500/groups/${group.id}/kick`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetUsername: member }),
+      });
+  
+      const data = await res.json();
+  
+      if (res.ok) {
+        alert(data.message);
+        // Remove member locally from state
+        setGroups((prev) =>
+          prev.map((g) =>
+            g.id === group.id ? { ...g, members: g.members.filter((m) => m !== member) } : g
+          )
+        );
+      } else {
+        alert('Failed to kick member: ' + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error kicking member');
+    }
+  };
+  const leaveGroup = async (group) => {
+    try {
+      const res = await fetch(`http://localhost:3500/groups/${group.id}/leave`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        setGroups((prev) => prev.filter(g => g.id !== group.id));
+      } else {
+        alert('Failed to leave group: ' + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error leaving group');
+    }
+  };
+
   const toggleGroupDetails = (index) => {
     setExpandedGroupIndex(expandedGroupIndex === index ? null : index);
+    
   };
 
   return (
@@ -172,11 +234,46 @@ const Groups = () => {
                   <div className="group-details">
                     <p><strong>Description:</strong> {group.description}</p>
                     <p><strong>Members:</strong></p>
-                    <ul>
+                    <ul className="member-list">
                       {group.members?.map((member, i) => (
-                        <li key={i}>{member}</li>
+                        <li key={i} className="member-item">
+                          <span>{member}</span>
+                          {username === group.createdBy && member !== username && (
+                            <button
+                              className="kick-button"
+                              title="Kick member"
+                              onClick={() => {
+                                const confirmKick = window.confirm(`Kick "${member}" from ${group.name}?`);
+                                if (confirmKick) kickMember(group, member);
+                              }}
+                            >
+                              ❌
+                            </button>
+                          )}
+                        </li>
                       ))}
                     </ul>
+
+
+                    <div style={{ marginTop: '1rem' }}>
+                      {username === group.createdBy ? (
+                        <Button
+                          label="Disband Group"
+                          onClick={() => {
+                            const confirmDelete = window.confirm(`Are you sure you want to disband "${group.name}"?`);
+                            if (confirmDelete) disbandGroup(group);
+                          }}
+                        />
+                      ) : (
+                        <Button
+                          label="Leave Group"
+                          onClick={() => {
+                            const confirmLeave = window.confirm(`Are you sure you want to leave "${group.name}"?`);
+                            if (confirmLeave) leaveGroup(group);
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
