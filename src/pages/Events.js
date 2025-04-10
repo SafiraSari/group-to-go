@@ -138,7 +138,7 @@ const getCountdown = (dateStr, timeStr) => {
 
   const handleEventDelete = async (eventName) => {
     try {
-      const response = await fetch(`http://localhost:3500/event/${eventName}`, {
+      const response = await fetch(`http://localhost:3500/events/${eventName}`, {
         method: 'DELETE',
       });
   
@@ -153,37 +153,40 @@ const getCountdown = (dateStr, timeStr) => {
     }
   };
   
-  const handleSaveEvent = async () => {
-    // Save the edited event back to the database
-    const updatedEvent = { ...selectedEvent, category };
+  const handleEventEdit = async (eventName) => {
+
+    const updatedData = {
+      eventName,
+      date,
+      groupID,
+      category,
+      time,
+      location,
+      agenda: agenda.filter(item => item.trim() !== "")
+    };
 
     try {
-      const response = await fetch(`http://localhost:3500/event/${selectedEvent.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedEvent),
+      const response = await fetch(`http://localhost:3500/events/${eventName}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData),
       });
-
-      const data = await response.json();
-
+  
       if (response.ok) {
-        // Update the state to reflect the changes
-        setEvents((prevEvents) =>
-          prevEvents.map((event) =>
-            event.id === selectedEvent.id ? data : event
-          )
+        const updatedEvent = await response.json();
+        // Update local state (optional, based on your structure)
+        setEvents(prev =>
+          prev.map(event => event.eventName === eventName ? { ...event, ...updatedData } : event)
         );
-        setIsEditing(false);
-        setSelectedEvent(null);
       } else {
-        console.error("Failed to update event:", data.error);
+        const error = await response.json();
+        console.error('Failed to update event:', error);
       }
     } catch (error) {
-      console.error("Error updating event:", error);
+      console.error('Error editing event:', error);
     }
   };
+  
 
     const fetchEvents = async () => {
         try {
@@ -329,7 +332,7 @@ const getCountdown = (dateStr, timeStr) => {
               <h2>Edit Event</h2>
               <Input
                 label="Event Name"
-                value={selectedEvent.eventName}
+                value={eventName}
                 placeholder={selectedEvent.eventName}
                 onChange={(e) => setEventName(e.target.value)}  // Set the event name properly
               />
@@ -339,6 +342,7 @@ const getCountdown = (dateStr, timeStr) => {
                 placeholder={selectedEvent.groupID}
                 onChange={(e) => setGroupID(e.target.value)}
               />
+
               <h3>Category: <strong>{category}</strong></h3>
               <div className="option-button">
                 {categories.map((cat, index) => (
@@ -349,13 +353,23 @@ const getCountdown = (dateStr, timeStr) => {
                   />
                 ))}
               </div>
+
               <Input
                 label="Date"
                 type="date"
-                placeholder={selectedEvent.date}
+                placeholder={selectedEvent.Date}
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
               />
+
+              <Input
+                label="Time"
+                type="time"
+                placeholder={selectedEvent.Time}
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              />
+
               <Input
                 label="Location"
                 placeholder={selectedEvent.location}
@@ -363,7 +377,7 @@ const getCountdown = (dateStr, timeStr) => {
                 onChange={(e) => setLocation(e.target.value)}
               />
               <div className="option-button">
-                <Button label="Save" onClick={() => handleSaveEvent()} />
+                <Button label="Save" onClick={() => handleEventEdit(selectedEvent.eventName)} />
                 <Button label="Cancel" onClick={() => setIsEditing(false)} />
               </div>
             </>
@@ -376,9 +390,7 @@ const getCountdown = (dateStr, timeStr) => {
 
               <div className="option-button">
                 <Button label="Edit" onClick={() => setIsEditing(true)} />
-                <Button label="Delete" variant = "red" onClick={() => { 
-                  {handleEventDelete(selectedEvent.eventName)}
-                }} />
+                <Button label="Delete" variant = "red" onClick={() => { handleEventDelete(selectedEvent.eventName)}} />
               </div>
             </>
           )}

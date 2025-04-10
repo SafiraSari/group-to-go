@@ -70,22 +70,12 @@ app.post('/login', async(req, res) => {
 app.post('/event', async (req, res) => {
     const { date, groupID, location, eventName,time, category} = req.body;
 
-    //DEBUGGING TEXT
-    /*
-    console.log("Time : " + time);
-    console.log("Date : " + date);
-    console.log("GroupID : " + groupID);
-    console.log("Location : " + location);
-    console.log("Event Name : " + eventName);
-    */
-    
-    // Validate required fields
     if (!date || !groupID || !location || !eventName|| !time || !category) {
         return res.status(400).json({ error: 'All fields (id, date, groupID, location, eventName, time) are required' });
     }
 
     try {
-        // Reference to Events/ID/{id}
+        
         const eventRef = db.ref(`Events/ID/${eventName}`);
 
         // Write the event data
@@ -147,7 +137,7 @@ app.get('/events', async (req, res) => {
     }
 });
 
-app.delete('/event/:eventName', async (req, res) => {
+app.delete('/events/:eventName', async (req, res) => {
     const { eventName } = req.params;
   
     if (!eventName) {
@@ -155,7 +145,6 @@ app.delete('/event/:eventName', async (req, res) => {
     }
   
     try {
-        
       const eventRef = db.ref(`Events/ID/${eventName}`);
       
       const snapshot = await eventRef.once('value');
@@ -172,31 +161,38 @@ app.delete('/event/:eventName', async (req, res) => {
     }
   });
   
-
-/*
-app.put('/event/:id', async (req, res) => {
-    const { id } = req.params;
-    const updatedEvent = req.body;
+  app.put('/events/:eventName', async (req, res) => {
+    const { eventName } = req.params;
+    const { date, groupID, location, time, category } = req.body;
+  
+    if (!eventName) {
+      return res.status(400).json({ error: 'Event name is required in URL' });
+    }
   
     try {
-      // Update the event in the database
-      const result = await db.collection('events').updateOne(
-        { _id: ObjectId(id) },
-        { $set: updatedEvent }
-      );
+      const eventRef = db.ref(`Events/ID/${eventName}`);
+      const snapshot = await eventRef.once('value');
   
-      if (result.modifiedCount === 0) {
-        return res.status(404).json({ error: 'Event not found or not modified' });
+      if (!snapshot.exists()) {
+        return res.status(404).json({ error: 'Event not found' });
       }
   
-      res.status(200).json(updatedEvent);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to update event' });
+      // Update fields
+      await eventRef.update({
+        Date: date,
+        GroupID: groupID,
+        Location: location,
+        Time: time,
+        Category: category,
+      });
+  
+      return res.status(200).json({ message: 'Event updated successfully' });
+    } catch (err) {
+      console.error('Error updating event:', err);
+      return res.status(500).json({ error: 'Internal server error' });
     }
   });
-*/
   
-
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
