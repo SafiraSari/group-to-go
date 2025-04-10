@@ -1,101 +1,66 @@
 import React, { useEffect, useState, useRef } from "react";
 import NavBar from "../components/NavBar";
 import SearchBar from "../components/SearchBar";
-import { APIProvider, Map, AdvancedMarker, InfoWindow, Pin, Autocomplete } from "@vis.gl/react-google-maps";
+import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api";
 import "./Map.css";
+
+const libraries = ["places", "geocoding"];
+
+//Styling for the map
+const containerStyle = {
+  width: "100%",
+  height: "800px",
+};
+
+const defaultCenter = {
+  lat: 45.4971,
+  lng: -73.5789,
+};
 
 const MapEvents = () => {
   const [userLocation, setUserLocation] = useState(null);
-  const mapRef = useRef(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [clickedPosition, setClickedPosition] = useState(null);
-  const geocoderRef = useRef(null);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [open, setOpen] = useState(false);
+  const mapRef = useRef(null);
   const placesServiceRef = useRef(null);
 
-  // Initialize services when map is ready
   const handleMapLoad = (map) => {
-    if (!window.google) return;
-    geocoderRef.current = new window.google.maps.Geocoder();
-    placesServiceRef.current = new window.google.maps.places.PlacesService(map);
     mapRef.current = map;
+    placesServiceRef.current = new window.google.maps.places.PlacesService(map);
   };
 
   const handleMapClick = (event) => {
-    if (!geocoderRef.current || !placesServiceRef.current) return;
-
-    const clickedLocation = {
-      lat: event.detail.latLng.lat,
-      lng: event.detail.latLng.lng
-    };
-    setClickedPosition(clickedLocation);
-
-    placesServiceRef.current.nearbySearch({
-      location: clickedLocation,
-      radius: 50,
-      rankBy: window.google.maps.places.RankBy.DISTANCE
-    }, (results, status) => {
-      if (status === "OK" && results[0]) {
-        const place = results[0];
-        handlePlaceSelected(place);
-      } else {
-        geocoderRef.current.geocode({ location: clickedLocation }, (results, status) => {
-          if (status === "OK" && results[0]) {
-            setSelectedPlace({
-              name: 'Selected Location',
-              address: results[0].formatted_address,
-              rating: null,
-              priceLevel: null,
-              type: 'Location',
-              reviewCount: 0
-            });
-          }
-        });
-      }
-    });
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    setClickedPosition({ lat, lng });
+    setSelectedPlace(null);
+    setOpen(false);
   };
 
   const handlePlaceSelected = (place) => {
-    if (!place.geometry) return;
+    console.log("Selected Place:", place);
 
-    const location = place.geometry.location;
-    const newPosition = {
-      lat: location.lat(),
-      lng: location.lng()
-    };
+    if (place.geometry) {
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
 
-    setClickedPosition(newPosition);
+      console.log("Place name:", place.name);
+      console.log("Formatted address:", place.formatted_address);
+      console.log("Rating:", place.rating);
+      console.log("Price level:", place.price_level);
 
-    if (mapRef.current) {
-      mapRef.current.panTo(newPosition);
-    }
-
-    if (placesServiceRef.current) {
-      placesServiceRef.current.getDetails(
-        { placeId: place.place_id || '' },
-        (result, status) => {
-          if (status === "OK") {
-            setSelectedPlace({
-              name: result.name || place.name,
-              address: result.formatted_address || result.vicinity,
-              rating: result.rating,
-              priceLevel: result.price_level,
-              type: result.types ? result.types[0] : 'Location',
-              reviewCount: result.user_ratings_total || 0
-            });
-          } else {
-            setSelectedPlace({
-              name: place.name,
-              address: place.formatted_address || place.vicinity || 'Address not available',
-              rating: null,
-              priceLevel: null,
-              type: 'Location',
-              reviewCount: 0
-            });
-          }
-        }
-      );
+      setClickedPosition({ lat, lng });
+      setSelectedPlace({
+        name: place.name,
+        address: place.formatted_address,
+        rating: place.rating,
+        priceLevel: place.price_level,
+      });
+      setOpen(true);
+    } else {
+      console.warn("No geometry found for place:", place);
     }
   };
 
@@ -109,7 +74,7 @@ const MapEvents = () => {
       },
       (error) => {
         console.error("Error getting user location:", error);
-        setUserLocation({ lat: 45.4971, lng: -73.5789 });
+        setUserLocation(defaultCenter);
       }
     );
   }, []);
@@ -121,73 +86,71 @@ const MapEvents = () => {
         <div className="map-header">
           <h1 className="map-title">MAP</h1>
         </div>
-        <APIProvider
-          apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
-          libraries={["places", "geocoding"]}
-        >
 
+        <LoadScript
+          googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
+          libraries={libraries}
+        >
           {userLocation && (
             <>
               <div className="map-search">
-                <SearchBar
-                  onPlaceSelected={handlePlaceSelected}
-                  mapRef={mapRef}
-                />
+                <SearchBar onPlaceSelected={handlePlaceSelected} />
               </div>
-              <Map
-                ref={mapRef}
-                defaultZoom={13}
-                defaultCenter={userLocation}
-                mapId={process.env.REACT_APP_GOOGLE_MAPS_MAP_ID}
-                style={{ width: "100%", height: "800px" }}
-                onClick={handleMapClick}
+
+              <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={userLocation}
+                zoom={13}
                 onLoad={handleMapLoad}
+                onClick={handleMapClick}
               >
                 {/* User location marker */}
-                <AdvancedMarker
+                <Marker
                   position={userLocation}
                   onClick={() => {
                     setClickedPosition(userLocation);
                     setOpen(true);
                   }}
-                >
-                  <Pin
-                    background={"var(--RED)"}
-                    borderColor={"var(--CARAMEL)"}
-                    glyphColor={"var(--OFF_WHITE)"}
-                  />
-                </AdvancedMarker>
+                />
 
+                {/* Marker for clicked/selected location */}
                 {clickedPosition && (
-                  <AdvancedMarker position={clickedPosition}>
-                    {selectedPlace && (
-                      <InfoWindow onCloseClick={() => setSelectedPlace(null)}>
-                        <div className="custom-infowindow">
-                          <h3>{selectedPlace.name}</h3>
-                          <p>{selectedPlace.address}</p>
-                          <div className="place-details">
-                            {selectedPlace.rating && (
-                              <span>⭐ {selectedPlace.rating}/5</span>
-                            )}
-                            {selectedPlace.priceLevel && (
-                              <span>💰 {'$'.repeat(selectedPlace.priceLevel)}</span>
-                            )}
-                          </div>
-                          <button
-                            className={`favorite-btn ${isFavorite ? 'favorited' : ''}`}
-                            onClick={() => setIsFavorite(!isFavorite)}
-                          >
-                            ♥
-                          </button>
-                        </div>
-                      </InfoWindow>
-                    )}
-                  </AdvancedMarker>
+                  <Marker
+                    position={clickedPosition}
+                    onClick={() => setOpen(true)}
+                  />
                 )}
-              </Map>
+
+                {/* InfoWindow */}
+                {open && selectedPlace && clickedPosition && (
+                  <InfoWindow
+                    position={clickedPosition}
+                    onCloseClick={() => setOpen(false)}
+                  >
+                    <div className="custom-infowindow">
+                      <h3>{selectedPlace.name}</h3>
+                      <p>{selectedPlace.address}</p>
+                      <div className="place-details">
+                        {selectedPlace.rating && (
+                          <span>⭐ {selectedPlace.rating}/5</span>
+                        )}
+                        {selectedPlace.priceLevel && (
+                          <span>💰 {'$'.repeat(selectedPlace.priceLevel)}</span>
+                        )}
+                      </div>
+                      <button
+                        className={`favorite-btn ${isFavorite ? 'favorited' : ''}`}
+                        onClick={() => setIsFavorite(!isFavorite)}
+                      >
+                        ♥
+                      </button>
+                    </div>
+                  </InfoWindow>
+                )}
+              </GoogleMap>
             </>
           )}
-        </APIProvider>
+        </LoadScript>
       </div>
     </>
   );
