@@ -19,7 +19,7 @@ const defaultCenter = {
   lng: -73.5789,
 };
 
-const MapEvents = () => {
+const Maps = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [clickedPosition, setClickedPosition] = useState(null);
@@ -178,7 +178,6 @@ const MapEvents = () => {
   }, []);
 
   const handleFavoriteClick = () => {
-    // Check if clicked position already exists in the favorite locations list
     const isAlreadyFavorite = favoriteLocations.some(
       (location) =>
         location.lat === clickedPosition.lat && location.lng === clickedPosition.lng
@@ -186,11 +185,10 @@ const MapEvents = () => {
   
     if (isAlreadyFavorite) {
       console.log("This location is already a favorite.");
-      setIsFavorite(true);  // Set as favorite if it already exists
+      setIsFavorite(true); 
       return;
     }
   
-    // If it's not already a favorite, add it to the list
     const newFavorite = {
       lat: clickedPosition.lat,
       lng: clickedPosition.lng,
@@ -301,4 +299,4 @@ const MapEvents = () => {
   );
 };
 
-export default MapEvents;
+export default Maps;
