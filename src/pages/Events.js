@@ -3,6 +3,7 @@ import NavBar from "../components/NavBar";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Modal from "../components/Modal";
+import Confirmation from "../components/Confirmation";
 import "./Events.css";
 
 const categories = [
@@ -25,8 +26,15 @@ const Events = () => {
   const [selectedCountdown, setSelectedCountdown] = useState("");
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
-  const [id, setID] = useState([]);
-  const [temp,setTemp] = useState([]);
+  const [deleteEvents, setdeleteEvents] = useState("");
+
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleDeleteClick = (eventName) => {
+    setdeleteEvents(eventName);
+    setShowConfirm(true);
+  };
+
 
   const getStatus = (dateStr, timeStr) => {
     if (!dateStr) return "No date set";
@@ -49,8 +57,6 @@ const Events = () => {
     return "Upcoming";
   };
   
-
-
 const getCountdown = (dateStr, timeStr) => {
   if (!dateStr) return "Date not set";
   
@@ -75,8 +81,6 @@ const getCountdown = (dateStr, timeStr) => {
   // Format the countdown
   return `${days}d ${hours}h ${minutes}m`;
 };
-
-
 
   useEffect(() => {
     if (!selectedEvent) return;
@@ -103,7 +107,7 @@ const getCountdown = (dateStr, timeStr) => {
     };
   
     try {
-      const response = await fetch('http://localhost:3500/event', {
+      const response = await fetch('http://localhost:3500/CreateEvents', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +142,7 @@ const getCountdown = (dateStr, timeStr) => {
 
   const handleEventDelete = async (eventName) => {
     try {
-      const response = await fetch(`http://localhost:3500/events/${eventName}`, {
+      const response = await fetch(`http://localhost:3500/DeleteEvents/${eventName}`, {
         method: 'DELETE',
       });
   
@@ -151,6 +155,10 @@ const getCountdown = (dateStr, timeStr) => {
     } catch (error) {
       console.error('Error deleting event:', error);
     }
+    setdeleteEvents("");
+    setShowConfirm(false);
+    setIsEditing(false);
+    setSelectedEvent(null)
   };
   
   const handleEventEdit = async (eventName) => {
@@ -166,7 +174,7 @@ const getCountdown = (dateStr, timeStr) => {
     };
 
     try {
-      const response = await fetch(`http://localhost:3500/events/${eventName}`, {
+      const response = await fetch(`http://localhost:3500/EditEvents/${eventName}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData),
@@ -190,7 +198,7 @@ const getCountdown = (dateStr, timeStr) => {
 
     const fetchEvents = async () => {
         try {
-            const response = await fetch('http://localhost:3500/events');
+            const response = await fetch('http://localhost:3500/FetchEvents');
             const data = await response.json();
 
             if (!response.ok) {
@@ -390,8 +398,17 @@ const getCountdown = (dateStr, timeStr) => {
 
               <div className="option-button">
                 <Button label="Edit" onClick={() => setIsEditing(true)} />
-                <Button label="Delete" variant = "red" onClick={() => { handleEventDelete(selectedEvent.eventName)}} />
+                <Button label="Delete" variant = "red" onClick={() =>  handleDeleteClick(selectedEvent.eventName)} />
               </div>
+
+              {showConfirm && (
+                <Confirmation
+                  label="delete this event"
+                  onCancel={() => setShowConfirm(false)}
+                  onConfirm={() => handleEventDelete(deleteEvents)}
+                />
+      )}
+
             </>
           )}
         </Modal>

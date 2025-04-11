@@ -67,7 +67,7 @@ app.post('/login', async(req, res) => {
     }
 });
 
-app.post('/event', async (req, res) => {
+app.post('/CreateEvents', async (req, res) => {
     const { date, groupID, location, eventName,time, category} = req.body;
 
     if (!date || !groupID || !location || !eventName|| !time || !category) {
@@ -104,7 +104,7 @@ app.post('/event', async (req, res) => {
     }
 });
 
-app.get('/events', async (req, res) => {
+app.get('/FetchEvents', async (req, res) => {
     try {
         // Reference to the entire Events node
         const eventsRef = db.ref('Events/ID');
@@ -137,7 +137,7 @@ app.get('/events', async (req, res) => {
     }
 });
 
-app.delete('/events/:eventName', async (req, res) => {
+app.delete('/DeleteEvents/:eventName', async (req, res) => {
     const { eventName } = req.params;
   
     if (!eventName) {
@@ -161,7 +161,7 @@ app.delete('/events/:eventName', async (req, res) => {
     }
   });
   
-  app.put('/events/:eventName', async (req, res) => {
+  app.put('/EditEvents/:eventName', async (req, res) => {
     const { eventName } = req.params;
     const { date, groupID, location, time, category } = req.body;
   
