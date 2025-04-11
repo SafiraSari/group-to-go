@@ -6,16 +6,10 @@ import Modal from "../components/Modal";
 import "./Schedule.css";
 
 const Schedule = () => {
-  // State for managing users and their availability
-  const [users, setUsers] = useState([
-    { id: 1, name: "User 1", color: "#3498db" },
-    { id: 2, name: "User 2", color: "#e74c3c" }
-  ]);
-  const [currentUser, setCurrentUser] = useState(1);
-  const [newUserName, setNewUserName] = useState("");
+  // State for managing availability
+  const [availability, setAvailability] = useState({});
   const [modalOpen, setModalOpen] = useState(false);
   const [eventTitle, setEventTitle] = useState("");
-  const [userID, setUserID] = useState("");
   const [selectedWeek, setSelectedWeek] = useState("");
   const [weekDateRange, setWeekDateRange] = useState("");
   
@@ -26,19 +20,13 @@ const Schedule = () => {
   // State to hold the dates for the current week
   const [weekDates, setWeekDates] = useState([]);
   
-  // Initialize availability grid for all users
-  const [availability, setAvailability] = useState({});
-  
   useEffect(() => {
-    // Initialize empty availability data structure
+    // Initialize empty availability
     const initialAvailability = {};
-    users.forEach(user => {
-      initialAvailability[user.id] = {};
-      days.forEach(day => {
-        initialAvailability[user.id][day] = {};
-        timeSlots.forEach(time => {
-          initialAvailability[user.id][day][time] = false;
-        });
+    days.forEach(day => {
+      initialAvailability[day] = {};
+      timeSlots.forEach(time => {
+        initialAvailability[day][time] = false;
       });
     });
     setAvailability(initialAvailability);
@@ -46,8 +34,6 @@ const Schedule = () => {
     // Set default week to current week
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
     const currentWeek = `${year}-W${getWeekNumber(today)}`;
     setSelectedWeek(currentWeek);
     updateWeekDates(currentWeek);
@@ -64,30 +50,20 @@ const Schedule = () => {
   const updateWeekDates = (weekString) => {
     if (!weekString) return;
     
-    // Parse the week string (format: YYYY-WXX)
     const year = parseInt(weekString.substring(0, 4));
     const weekNum = parseInt(weekString.substring(6));
-    
-    // Calculate the first day of the year
     const firstDayOfYear = new Date(year, 0, 1);
-    
-    // Calculate days to add to get to the first day of the selected week
-    // Week 1 is the week with the first Thursday of the year (ISO 8601)
     const dayOffset = (weekNum - 1) * 7;
-    
-    // Find the first day of the selected week (should be a Monday per ISO 8601)
     const firstDayOfWeek = new Date(firstDayOfYear);
     firstDayOfWeek.setDate(firstDayOfYear.getDate() + dayOffset - firstDayOfYear.getDay() + 1);
     
-    // If firstDayOfYear is a Sunday, we need to adjust
     if (firstDayOfYear.getDay() === 0) {
       firstDayOfWeek.setDate(firstDayOfWeek.getDate() - 7);
     }
     
-    // Create an array of dates for the week starting from Sunday
     const dates = [];
     const sundayOfWeek = new Date(firstDayOfWeek);
-    sundayOfWeek.setDate(sundayOfWeek.getDate() - 1); // Go back to Sunday
+    sundayOfWeek.setDate(sundayOfWeek.getDate() - 1);
     
     for (let i = 0; i < 7; i++) {
       const date = new Date(sundayOfWeek);
@@ -97,7 +73,6 @@ const Schedule = () => {
     
     setWeekDates(dates);
     
-    // Create a formatted date range string for the title
     if (dates.length > 0) {
       const firstDate = dates[0];
       const lastDate = dates[6];
@@ -111,90 +86,33 @@ const Schedule = () => {
     }
   };
   
-  // Handle week selection change
   const handleWeekChange = (e) => {
     const week = e.target.value;
     setSelectedWeek(week);
     updateWeekDates(week);
   };
   
-  // Format time for compact display
   const formatTime = (hour) => {
     if (hour === 12) return "12pm";
     return hour < 12 ? `${hour}am` : `${hour-12}pm`;
   };
   
-  // Toggle availability for a specific time slot
   const toggleAvailability = (day, time) => {
-    console.log(`Toggling availability for ${day} at ${time}`);
-    setAvailability(prev => {
-      // Create a deep copy to ensure state update
-      const newAvailability = JSON.parse(JSON.stringify(prev));
-      
-      // Initialize if needed
-      if (!newAvailability[currentUser]) {
-        newAvailability[currentUser] = {};
+    setAvailability(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [time]: !prev[day]?.[time]
       }
-      if (!newAvailability[currentUser][day]) {
-        newAvailability[currentUser][day] = {};
-      }
-      
-      // Toggle the value
-      newAvailability[currentUser][day][time] = !newAvailability[currentUser][day][time];
-      return newAvailability;
-    });
+    }));
   };
   
-  // Add a new user
-  const addUser = () => {
-    if (!newUserName.trim()) return;
-    
-    const newUser = {
-      id: users.length + 1,
-      name: newUserName,
-      color: `#${Math.floor(Math.random()*16777215).toString(16)}`
-    };
-    
-    setUsers([...users, newUser]);
-    setNewUserName("");
-    
-    // Initialize availability for new user
-    setAvailability(prev => {
-      const newAvailability = {...prev};
-      newAvailability[newUser.id] = {};
-      days.forEach(day => {
-        newAvailability[newUser.id][day] = {};
-        timeSlots.forEach(time => {
-          newAvailability[newUser.id][day][time] = false;
-        });
-      });
-      return newAvailability;
-    });
-  };
-  
-  // Determine cell styling based on availability
   const getCellStyle = (day, time) => {
-    // Check if the current user has marked this slot
-    const isSelected = availability[currentUser]?.[day]?.[time] === true;
-    
-    // Count how many users are available at this time
-    const availableUsers = users.filter(user => 
-      availability[user.id]?.[day]?.[time] === true
-    ).length;
-    
-    let backgroundColor = "#f4f4f4"; // No availability
-    
-    if (availableUsers > 0) {
-      if (availableUsers === users.length) {
-        backgroundColor = "#81c784"; // Full availability
-      } else {
-        backgroundColor = "#ffcc80"; // Partial availability
-      }
-    }
+    const isAvailable = availability[day]?.[time];
     
     return {
-      backgroundColor,
-      border: isSelected ? "2px solid #2196f3" : "1px solid #ddd",
+      backgroundColor: isAvailable ? "#FDDB74" : "#f4f4f4",
+      border: isAvailable ? "2px solid #2196f3" : "1px solid #ddd",
       width: "100%",
       height: "100%",
       cursor: "pointer"
@@ -216,37 +134,18 @@ const Schedule = () => {
           <h1>SCHEDULE</h1>
       </div>
       <div className="schedule-container">
-        
         <Button label="+ Create New Schedule" onClick={() => setModalOpen(true)} />
         
-        {/* User selection buttons */}
-        <div className="user-selection">
-          <h3>Select User:</h3>
-          <div className="option-button">
-            {users.map(user => (
-              <Button 
-                key={user.id}
-                label={user.name}
-                onClick={() => setCurrentUser(user.id)}
-                className={currentUser === user.id ? "active" : ""}
-              />
-            ))}
-          </div>
-        </div>
-        
-        {/* Instructions */}
         <div className="schedule-instructions">
           <p>Click on time slots to mark your availability</p>
         </div>
         
-        {/* Week title */}
         {weekDateRange && (
           <div className="week-title">
             <h2>{weekDateRange}</h2>
           </div>
         )}
         
-        {/* Schedule grid */}
         <div className="schedule-grid">
           <table>
             <thead>
@@ -285,30 +184,20 @@ const Schedule = () => {
           </table>
         </div>
         
-        {/* Legend */}
         <div className="schedule-legend">
           <h3>Legend:</h3>
           <div className="legend-items">
             <div className="legend-item">
               <div className="legend-color no-availability"></div>
-              <span>No availability</span>
-            </div>
-            <div className="legend-item">
-              <div className="legend-color partial-availability"></div>
-              <span>Some availability</span>
+              <span>Not available</span>
             </div>
             <div className="legend-item">
               <div className="legend-color full-availability"></div>
-              <span>Everyone available</span>
-            </div>
-            <div className="legend-item">
-              <div className="legend-color user-selected"></div>
-              <span>Your selection</span>
+              <span>Available</span>
             </div>
           </div>
         </div>
         
-        {/* Create Schedule Modal */}
         {modalOpen && (
           <Modal 
             onSubmit={handleModalSubmit} 
@@ -317,14 +206,6 @@ const Schedule = () => {
           >
             <div className="modal-form">
               <h1>CREATE NEW SCHEDULE</h1>
-              <Input 
-                label="UserId" 
-                placeholder="Enter user ID" 
-                value={userID}
-                onChange={(e) => setUserID(e.target.value)}
-                isRequired 
-              />
-
               <Input 
                 label="Event Title" 
                 placeholder="Enter event title" 

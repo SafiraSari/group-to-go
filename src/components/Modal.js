@@ -42,7 +42,7 @@ const Modal = ({ onSubmit, onCancel, onClose, children, hideButton = false }) =>
       {!hideButton &&(
         <div className='modal-footer'>
           <Button label="Cancel" variant="red" onClick={onCancel} />
-          <Button label="Create Poll" variant="green" onClick={handleSubmitClick} />
+          <Button label="Confirm" variant="green" onClick={handleSubmitClick} />
         </div>
 
       )}
