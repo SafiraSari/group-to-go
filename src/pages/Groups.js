@@ -17,7 +17,7 @@ const Groups = () => {
   const [expandedGroupIndex, setExpandedGroupIndex] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // ✅ Confirmation modal state
+  // Confirmation modal state
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationLabel, setConfirmationLabel] = useState('');
   const [onConfirmCallback, setOnConfirmCallback] = useState(() => () => {});
