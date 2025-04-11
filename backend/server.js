@@ -338,6 +338,28 @@ app.post('/expenses', async (req, res) => {
       res.status(500).json({ error: "Failed to fetch expenses" });
     }
   });
+  app.delete("/expenses/:groupCode/:expenseId", async (req, res) => {
+    const { groupCode, expenseId } = req.params;
+  
+    if (!groupCode || !expenseId) {
+      return res.status(400).json({ error: "Missing group code or expense ID" });
+    }
+  
+    try {
+      const expenseRef = db.ref(`expenses/${groupCode}/${expenseId}`);
+      const snapshot = await expenseRef.once("value");
+  
+      if (!snapshot.exists()) {
+        return res.status(404).json({ error: "Expense not found" });
+      }
+  
+      await expenseRef.remove();
+      res.status(200).json({ message: "Expense deleted successfully" });
+    } catch (err) {
+      console.error("Error deleting expense:", err);
+      res.status(500).json({ error: "Failed to delete expense" });
+    }
+  });
 
 // Start the Express server
 app.listen(port, () => {

@@ -89,7 +89,26 @@ const Expenses = () => {
     setPricePerPerson(null);
     setErrorMessage("");
   };
-
+  const deleteExpense = async (expenseId, groupCode) => {
+    if (!expenseId || !groupCode) {
+      console.error("Missing expense ID or group code");
+      return;
+    }
+    try {
+      const res = await fetch(`http://localhost:3500/expenses/${groupCode}/${expenseId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUserExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+      } else {
+        console.error("Failed to delete expense:", data.error);
+      }
+    } catch (err) {
+      console.error("Error deleting expense:", err);
+    }
+  };
+  
   const handleCalculate = async () => {
     if (!price || selectedMembers.length === 0 || !eventName || !groupId.trim()) {
       setErrorMessage("All fields are required, including at least one member.");
@@ -217,6 +236,18 @@ const Expenses = () => {
                         </li>
                       ))}
                     </ul>
+                    {exp.createdBy === username && (
+                      <div className="delete-button-wrapper">
+                        <Button
+                          label="Delete Expense"
+                          variant="red"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteExpense(exp.id, exp.groupId);
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
