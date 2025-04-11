@@ -14,17 +14,18 @@ const Groups = () => {
   const [joinCode, setJoinCode] = useState('');
   const [groups, setGroups] = useState([]);
   const [expandedGroupIndex, setExpandedGroupIndex] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Load groups for user
   useEffect(() => {
     const fetchGroups = async () => {
       try {
         const res = await fetch(`http://localhost:3500/groups/user/${username}`);
         const data = await res.json();
         if (res.ok) setGroups(data);
-        else console.error('Failed to load groups:', data.error);
+        else setErrorMessage(data.error || 'Failed to load groups.');
       } catch (err) {
         console.error('Error fetching groups:', err);
+        setErrorMessage('Error loading groups.');
       }
     };
     fetchGroups();
@@ -36,9 +37,13 @@ const Groups = () => {
     setGroupName('');
     setGroupDesc('');
     setJoinCode('');
+    setErrorMessage('');
   };
 
-  const handleCloseModal = () => setModalOpen(false);
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setErrorMessage('');
+  };
 
   const generateGroupCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -66,13 +71,14 @@ const Groups = () => {
         if (res.ok) {
           const newGroup = { ...groupPayload, id: data.groupId, members: [username] };
           setGroups((prev) => [...prev, newGroup]);
-          alert(`Group "${groupName}" created!\nCode: ${code}`);
+          setErrorMessage('');
+          handleCloseModal();
         } else {
-          alert('Failed to create group: ' + data.error);
+          setErrorMessage(data.error || 'Failed to create group.');
         }
       } catch (err) {
         console.error(err);
-        alert('Something went wrong. Try again.');
+        setErrorMessage('Something went wrong while creating the group.');
       }
     } else if (mode === 'join') {
       try {
@@ -84,20 +90,19 @@ const Groups = () => {
 
         const data = await res.json();
         if (res.ok) {
-          alert(`Successfully joined group!`);
           const updatedGroups = await fetch(`http://localhost:3500/groups/user/${username}`);
           const updatedData = await updatedGroups.json();
           setGroups(updatedData);
+          setErrorMessage('');
+          handleCloseModal();
         } else {
-          alert(data.error || 'Failed to join group');
+          setErrorMessage(data.error || 'Failed to join group.');
         }
       } catch (err) {
         console.error(err);
-        alert('Something went wrong.');
+        setErrorMessage('Something went wrong while joining the group.');
       }
     }
-
-    handleCloseModal();
   };
 
   const disbandGroup = async (group) => {
@@ -107,14 +112,14 @@ const Groups = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        alert(data.message);
         setGroups((prev) => prev.filter(g => g.id !== group.id));
+        setErrorMessage('');
       } else {
-        alert('Failed to disband group: ' + data.error);
+        setErrorMessage(data.error || 'Failed to disband group.');
       }
     } catch (err) {
       console.error(err);
-      alert('Error disbanding group');
+      setErrorMessage('Error disbanding group.');
     }
   };
 
@@ -127,7 +132,6 @@ const Groups = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        alert(data.message);
         setGroups((prev) =>
           prev.map((g) =>
             g.id === group.id
@@ -135,12 +139,13 @@ const Groups = () => {
               : g
           )
         );
+        setErrorMessage('');
       } else {
-        alert('Failed to kick member: ' + data.error);
+        setErrorMessage(data.error || 'Failed to kick member.');
       }
     } catch (err) {
       console.error(err);
-      alert('Error kicking member');
+      setErrorMessage('Error kicking member.');
     }
   };
 
@@ -153,14 +158,14 @@ const Groups = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        alert(data.message);
         setGroups((prev) => prev.filter(g => g.id !== group.id));
+        setErrorMessage('');
       } else {
-        alert('Failed to leave group: ' + data.error);
+        setErrorMessage(data.error || 'Failed to leave group.');
       }
     } catch (err) {
       console.error(err);
-      alert('Error leaving group');
+      setErrorMessage('Error leaving group.');
     }
   };
 
@@ -183,9 +188,8 @@ const Groups = () => {
 
         {modalOpen && (
           <Modal onSubmit={handleSubmit} onCancel={handleCloseModal} onClose={handleCloseModal}>
-            <h1 className="modal-title">
-              {mode === 'create' ? 'Create a New Group' : 'Join an Existing Group'}
-            </h1>
+            <h1>{mode === 'create' ? 'Create a New Group' : 'Join an Existing Group'}</h1>
+
             {mode === 'create' ? (
               <>
                 <Input
@@ -209,6 +213,8 @@ const Groups = () => {
                 onChange={(e) => setJoinCode(e.target.value)}
               />
             )}
+
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
           </Modal>
         )}
 
@@ -253,7 +259,10 @@ const Groups = () => {
                     <div style={{ marginTop: '1rem' }}>
                       {username === group.createdBy ? (
                         <Button
+                        
                           label="Disband Group"
+                          variant = "red"
+                          
                           onClick={() => {
                             const confirmDelete = window.confirm(`Are you sure you want to disband "${group.name}"?`);
                             if (confirmDelete) disbandGroup(group);
@@ -261,7 +270,10 @@ const Groups = () => {
                         />
                       ) : (
                         <Button
+
+                          variant = "red"
                           label="Leave Group"
+                          type="red"
                           onClick={() => {
                             const confirmLeave = window.confirm(`Are you sure you want to leave "${group.name}"?`);
                             if (confirmLeave) leaveGroup(group);

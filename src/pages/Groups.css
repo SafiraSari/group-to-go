@@ -133,3 +133,8 @@
     align-items: center;
   }
 }
+.error-message {
+  color: var(--RED);
+  font-weight: 500;
+  margin-top: 1rem;
+}
