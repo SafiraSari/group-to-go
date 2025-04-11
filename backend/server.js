@@ -223,6 +223,34 @@ app.post('/groups/:groupId/kick', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+  //polls
+
+  app.post('/polls', async (req, res) => {
+    const { pollName, question, notes, options, groupId, category, createdBy } = req.body;
+  
+    if (!pollName || !question || !options || !groupId || !category || !createdBy) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+  
+    try {
+      const pollsRef = db.ref(`polls/${groupId}`).push();
+      const newPoll = {
+        pollName,
+        question,
+        notes: notes || "",
+        options,
+        category,
+        createdBy,
+        createdAt: Date.now(),
+      };
+  
+      await pollsRef.set(newPoll);
+      return res.status(200).json({ message: "Poll saved", poll: newPoll, id: pollsRef.key });
+    } catch (err) {
+      console.error("Error saving poll:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
