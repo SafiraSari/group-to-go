@@ -40,6 +40,10 @@ Install the necessary packages:
 npm i
 ```
 
+```cmd
+npm install @react-google-maps/api
+```
+
 ### Step 3: Execute the Program
 
 Start the app using the command below. Once it has compiled successfully, view the app in the browser through the link provided.

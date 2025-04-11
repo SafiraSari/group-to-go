@@ -223,6 +223,86 @@ app.post('/groups/:groupId/kick', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+  //polls
+
+  app.post('/polls', async (req, res) => {
+    const { pollName, question, notes, options, groupId, category, createdBy } = req.body;
+  
+    if (!pollName || !question || !options || !groupId || !category || !createdBy) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+  
+    try {
+      const pollsRef = db.ref(`polls/${groupId}`).push();
+      const newPoll = {
+        pollName,
+        question,
+        notes: notes || "",
+        options,
+        category,
+        createdBy,
+        createdAt: Date.now(),
+      };
+  
+      await pollsRef.set(newPoll);
+      return res.status(200).json({ message: "Poll saved", poll: newPoll, id: pollsRef.key });
+    } catch (err) {
+      console.error("Error saving poll:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/polls/user/:username", async (req, res) => {
+    const { username } = req.params;
+  
+    try {
+      console.log(`Fetching polls for user: ${username}`);
+      
+      // First get all groups the user is in
+      const groupsRef = db.ref("groups");
+      const groupsSnap = await groupsRef.once("value");
+      
+      // Get all polls
+      const pollsRef = db.ref("polls");
+      const pollsSnap = await pollsRef.once("value");
+      
+      const result = [];
+      
+      // Loop through all groups
+      groupsSnap.forEach((groupChild) => {
+        const group = groupChild.val();
+        const groupId = groupChild.key;
+        
+        // Check if user is member or creator of this group
+        if (group.members?.includes(username) || group.createdBy === username) {
+          // Get polls for this group
+          const groupPolls = pollsSnap.child(groupId);
+          
+          if (groupPolls.exists()) {
+            console.log(`Found polls for group ${groupId}: ${group.name}`);
+            
+            // Loop through polls in this group
+            groupPolls.forEach((pollChild) => {
+              const poll = pollChild.val();
+              result.push({
+                ...poll,
+                id: pollChild.key,
+                groupId,
+                groupCode: group.code,
+                groupName: group.name
+              });
+            });
+          }
+        }
+      });
+      
+      console.log(`Found ${result.length} polls for user ${username}`);
+      res.status(200).json(result);
+    } catch (err) {
+      console.error("Error fetching polls:", err);
+      res.status(500).json({ error: "Failed to fetch polls" });
+    }
+  });
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

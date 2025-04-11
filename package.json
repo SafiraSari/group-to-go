@@ -12,6 +12,7 @@
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "firebase-admin": "^13.2.0",
     "mysql2": "^3.14.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
