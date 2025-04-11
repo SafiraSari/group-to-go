@@ -1,8 +1,6 @@
-.search-container {
+.searchbar-container {
     position: relative;
-    display: flex;
-    width: 100%;
-    max-width: 600px; 
+    left: 700px;
     margin: 0 auto;
   }
   
@@ -20,6 +18,7 @@
     align-items: center;
     justify-content: center;
   }
+  
   
   .searchimg {
     width: 38px;

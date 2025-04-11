@@ -11,7 +11,7 @@ const libraries = ["places", "geocoding"];
 
 const containerStyle = {
   width: "100%",
-  height: "800px",
+  height: "900px",
 };
 
 const defaultCenter = {
@@ -227,11 +227,10 @@ const Maps = () => {
   return (
     <>
       <NavBar />
-      <div className="map">
-        <div >
-          <h1 className="map-header-title">MAP</h1>
+      <div className="map-container">
+        <div className="header-title">
+          <h1>MAPS</h1>
         </div>
-
         <LoadScript
           googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
           libraries={libraries}
@@ -294,7 +293,8 @@ const Maps = () => {
             </>
           )}
         </LoadScript>
-      </div>
+
+        </div>
     </>
   );
 };

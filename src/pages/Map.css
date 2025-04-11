@@ -1,33 +1,15 @@
 @import url("../constants.css");
 
-.map-header-title {
-    text-align: center;
-    text-transform: uppercase;
-    font-size: 30px; 
-    letter-spacing: 1px;
-    color: var(--CARAMEL);
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    grid-template-rows: 16px 0;
-    grid-gap: 22px;
-    margin: 20px 0;
+.map-container {
+  width: 100%;
+  text-align: center;
+  align-items: center;
 }
-   
-.map-header-title:after , .map-header-title:before {
-    content: " ";
-    display: block;
-    border-bottom: 2px solid var(--SANDY);
-}
-.map {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.map-header{
+/* .map-header{
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
+} */
 .location-button {
     background-color: var(--CARAMEL);
     color: white;
