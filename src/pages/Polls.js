@@ -65,16 +65,19 @@ const Polls = () => {
           setPolls([]);
         } else {
           // Transform the data properly
-          const accordionItems = data.map(poll => ({
+          data.sort((a, b) => b.createdAt - a.createdAt);
+          const accordionItems = data.map((poll) => ({
             title: `[${poll.status === 'completed' ? 'Completed' : 'Pending'}] - ${poll.category.toUpperCase()} - ${poll.pollName}`,
             content: (
               <PollContent
                 poll={poll}
                 category={CATEGORIES.find((c) => c.name === poll.category) || CATEGORIES[0]}
-                onVoteSubmitted={() => setPollsUpdated(prev => !prev)}
+                onVoteSubmitted={() => setPollsUpdated((prev) => !prev)}
               />
-            )
+            ),
+            className: poll.status === 'completed' ? 'accordion-completed' : ''
           }));
+          
           setPolls(accordionItems);
         }
       } else {
@@ -219,15 +222,14 @@ const Polls = () => {
     
     // Render different content based on poll status
     if (poll.status === 'completed') {
-      // For completed polls, show results
       return (
-        <div className="poll-content">
+        <div className={`poll-content ${poll.status === 'completed' ? 'completed' : ''}`}>
           <p><strong>Question:</strong> {poll.question}</p>
           <div className="poll-content-category">
             <img src={category.icon} alt={category.name} />
             <span><strong>Category:</strong> {category.name}</span>
           </div>
-          
+    
           <h3>Results:</h3>
           <div className="poll-results">
             {poll.options.map((option, index) => {
@@ -235,38 +237,34 @@ const Polls = () => {
               const percentage = poll.totalVotes > 0 
                 ? Math.round((votes / poll.totalVotes) * 100) 
                 : 0;
-              
+    
               return (
                 <div key={index} className="poll-result-item">
                   <div className="poll-result-option">
                     {option} {poll.votes && poll.votes[username] === option && " (Your Vote)"}
                   </div>
                   <div className="poll-result-bar-container">
-                    <div 
-                      className="poll-result-bar" 
-                      style={{ width: `${percentage}%` }}
-                    ></div>
+                    <div className="poll-result-bar" style={{ width: `${percentage}%` }}></div>
                     <span className="poll-result-percentage">{percentage}% ({votes} votes)</span>
                   </div>
                 </div>
               );
             })}
           </div>
-          
-          {notes && <p style={{ fontStyle: "italic", color: "#666" }}>{notes}</p>}
+    
+          {poll.notes && <p style={{ fontStyle: "italic", color: "#888", marginTop: "1rem" }}>Note: {poll.notes}</p>}
           <p>All {poll.totalMembers} group members have voted.</p>
         </div>
       );
     } else {
-      // For pending polls, show voting interface
       return (
-        <div className="poll-content">
+        <div className={`poll-content ${poll.status === 'completed' ? 'completed' : ''}`}>
           <p><strong>Question:</strong> {poll.question}</p>
           <div className="poll-content-category">
             <img src={category.icon} alt={category.name} />
             <span><strong>Category:</strong> {category.name}</span>
           </div>
-          
+    
           <div className="poll-content-options">
             {poll.options.map((option, index) => (
               <ButtonOption
@@ -278,11 +276,11 @@ const Polls = () => {
               />
             ))}
           </div>
-          
-          {notes && <p style={{ fontStyle: "italic", color: "#666" }}>{notes}</p>}
-          
+    
+          {poll.notes && <p style={{ fontStyle: "italic", color: "#888", marginTop: "1rem" }}>Note: {poll.notes}</p>}
+    
           {voteError && <p className="error">{voteError}</p>}
-          
+    
           {poll.hasVoted ? (
             <p>You already voted for: <strong>{poll.votes[username]}</strong></p>
           ) : (
@@ -293,7 +291,7 @@ const Polls = () => {
               disabled={voteSubmitting} 
             />
           )}
-          
+    
           <p className="poll-vote-count">
             {poll.totalVotes} of {poll.totalMembers} members have voted.
           </p>
