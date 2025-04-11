@@ -223,6 +223,122 @@ app.post('/groups/:groupId/kick', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+
+//for Expenses tab
+// Create expense
+app.post('/expenses', async (req, res) => {
+    try {
+      const { eventName, amount, groupId, createdBy, splitAmong } = req.body;
+  
+      if (!eventName || !amount || !groupId || !createdBy || !splitAmong) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+  
+      const expenseRef = db.ref(`expenses/${groupId}`).push();
+      const newExpense = {
+        eventName,
+        amount,
+        splitAmong,
+        createdBy,
+        createdAt: Date.now()
+      };
+  
+      await expenseRef.set(newExpense);
+      res.status(200).json({ message: "Expense saved", expense: newExpense, id: expenseRef.key });
+    } catch (err) {
+      console.error("Error saving expense:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Get user expenses
+  app.get("/expenses/user/:username", async (req, res) => {
+    const { username } = req.params;
+  
+    try {
+      const groupsSnap = await db.ref("groups").once("value");
+      const expensesSnap = await db.ref("expenses").once("value");
+  
+      const userGroups = [];
+  
+      groupsSnap.forEach(groupChild => {
+        const group = groupChild.val();
+        if (group.members?.includes(username)) {
+          userGroups.push(group.code); // <-- use `code` not Firebase key
+        }
+      });
+  
+      const userExpenses = [];
+  
+      userGroups.forEach(code => {
+        const groupExpenses = expensesSnap.child(code);
+        if (groupExpenses.exists()) {
+          groupExpenses.forEach(expChild => {
+            const exp = expChild.val();
+            userExpenses.push({
+              ...exp,
+              id: expChild.key,
+              groupId: code
+            });
+          });
+        }
+      });
+  
+      res.status(200).json(userExpenses);
+    } catch (err) {
+      console.error("Error fetching user expenses:", err);
+      res.status(500).json({ error: "Failed to fetch expenses" });
+    }
+  });
+  
+  // Get members of group
+  app.get('/groups/:code/members', async (req, res) => {
+    const { code } = req.params;
+    try {
+      const snapshot = await db.ref('groups').orderByChild('code').equalTo(code).once('value');
+      if (!snapshot.exists()) return res.status(404).json({ error: 'Group not found' });
+  
+      const groupData = Object.values(snapshot.val())[0];
+      return res.json({ members: groupData.members || [] });
+    } catch (err) {
+      console.error('Error fetching members:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+  // Get groups for a user
+  app.get("/expenses/user/:username", async (req, res) => {
+    const { username } = req.params;
+    try {
+      const groupSnap = await db.ref("groups").once("value");
+      const allExpenses = [];
+      const expenseSnap = await db.ref("expenses").once("value");
+  
+      groupSnap.forEach((groupChild) => {
+        const group = groupChild.val();
+        const groupId = groupChild.key;
+        const isMember = group.members?.includes(username);
+  
+        if (isMember && expenseSnap.child(groupId).exists()) {
+          expenseSnap.child(groupId).forEach((expChild) => {
+            const exp = expChild.val();
+            allExpenses.push({
+              ...exp,
+              id: expChild.key,
+              groupId,
+            });
+          });
+        }
+      });
+  
+      res.status(200).json(allExpenses);
+    } catch (err) {
+      console.error("Error fetching user expenses:", err);
+      res.status(500).json({ error: "Failed to fetch expenses" });
+    }
+  });
+
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
