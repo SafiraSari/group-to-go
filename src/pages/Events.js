@@ -7,7 +7,7 @@ import Confirmation from "../components/Confirmation";
 import "./Events.css";
 
 const categories = [
-  "General", "Food", "Activity", "Time", "Other"
+  "General", "Food", "Games", "Sports", "Party"
 ];
 
 const Events = () => {
@@ -102,6 +102,7 @@ const getCountdown = (dateStr, timeStr) => {
       groupID,
       category,
       time,
+      notes,
       location,
       agenda: agenda.filter(item => item.trim() !== "")
     };
@@ -169,6 +170,7 @@ const getCountdown = (dateStr, timeStr) => {
       groupID,
       category,
       time,
+      notes,
       location,
       agenda: agenda.filter(item => item.trim() !== "")
     };
@@ -193,9 +195,11 @@ const getCountdown = (dateStr, timeStr) => {
     } catch (error) {
       console.error('Error editing event:', error);
     }
+
+    setIsEditing(false);
+    setSelectedEvent(false);
   };
   
-
     const fetchEvents = async () => {
         try {
             const response = await fetch('http://localhost:3500/FetchEvents');
@@ -259,7 +263,7 @@ const getCountdown = (dateStr, timeStr) => {
               isRequired
             />
             <Input
-              label="GroupID"
+              label="Group Code"
               placeholder="Enter the GroupID"
               value={groupID}
               onChange={(e) => setGroupID(e.target.value)}
@@ -345,22 +349,11 @@ const getCountdown = (dateStr, timeStr) => {
                 onChange={(e) => setEventName(e.target.value)}  // Set the event name properly
               />
               <Input
-                label="GroupID"
+                label="Group Code"
                 value={groupID}
                 placeholder={selectedEvent.groupID}
                 onChange={(e) => setGroupID(e.target.value)}
               />
-
-              <h3>Category: <strong>{category}</strong></h3>
-              <div className="option-button">
-                {categories.map((cat, index) => (
-                  <Button
-                    key={index}
-                    label={cat}
-                    onClick={() => setCategory(cat)}
-                  />
-                ))}
-              </div>
 
               <Input
                 label="Date"
@@ -384,6 +377,26 @@ const getCountdown = (dateStr, timeStr) => {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
+
+              <h3>Category: <strong>{category}</strong></h3>
+              <div className="option-button">
+                {categories.map((cat, index) => (
+                  <Button
+                    key={index}
+                    label={cat}
+                    onClick={() => setCategory(cat)}
+                  />
+                ))}
+              </div>
+
+            <Input
+              label="Notes"
+              type="text"
+              placeholder="Extra details (optional)"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+
               <div className="option-button">
                 <Button label="Save" onClick={() => handleEventEdit(selectedEvent.eventName)} />
                 <Button label="Cancel" onClick={() => setIsEditing(false)} />
@@ -393,6 +406,9 @@ const getCountdown = (dateStr, timeStr) => {
             <>
               <h2>{selectedEvent.eventName}</h2>
               <p><strong>Category:</strong> {selectedEvent.Category}</p>
+              <p><strong>Group Code:</strong> {selectedEvent.GroupID}</p>
+              <p><strong>Location:</strong> {selectedEvent.Location}</p>
+              <p><strong>Notes:</strong> {selectedEvent.Notes}</p>
               <p><strong>Date:</strong> {selectedEvent.Date}</p>
               <p><strong>Countdown:</strong> {getCountdown(selectedEvent.Date, selectedEvent.Time)}</p>
 

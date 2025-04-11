@@ -68,7 +68,7 @@ app.post('/login', async(req, res) => {
 });
 
 app.post('/CreateEvents', async (req, res) => {
-    const { date, groupID, location, eventName,time, category} = req.body;
+    const { date, groupID, location, eventName,time, category, notes} = req.body;
 
     if (!date || !groupID || !location || !eventName|| !time || !category) {
         return res.status(400).json({ error: 'All fields (id, date, groupID, location, eventName, time) are required' });
@@ -85,6 +85,7 @@ app.post('/CreateEvents', async (req, res) => {
             Location: location,
             eventName: eventName,
             Category: category,
+            Notes: notes,
             Time: time
         });
 
@@ -163,7 +164,7 @@ app.delete('/DeleteEvents/:eventName', async (req, res) => {
   
   app.put('/EditEvents/:eventName', async (req, res) => {
     const { eventName } = req.params;
-    const { date, groupID, location, time, category } = req.body;
+    const { date, groupID, location, time, category, notes } = req.body;
   
     if (!eventName) {
       return res.status(400).json({ error: 'Event name is required in URL' });
@@ -183,6 +184,7 @@ app.delete('/DeleteEvents/:eventName', async (req, res) => {
         GroupID: groupID,
         Location: location,
         Time: time,
+        Notes: notes,
         Category: category,
       });
   
