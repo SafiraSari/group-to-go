@@ -1,0 +1,133 @@
+.groups-container {
+  width: 100%;
+  text-align: center;
+  padding-top: 1rem;
+  
+}
+
+/* 💡 Fixed Section Title Styling with Divider Lines */
+.header-title {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 2rem;
+}
+
+.header-title::before,
+.header-title::after {
+  content: "";
+  display: block;
+  border-bottom: 2px solid var(--SANDY);
+  height: 1px;
+}
+
+.header-title h1 {
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 30px;
+  letter-spacing: 1px;
+  color: var(--CARAMEL);
+  margin: 0;
+}
+
+/* Group Button Layout */
+.groups-button-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Group List Container */
+.groups-list {
+  margin: 0 auto;
+  width: 80%;
+  padding-top: 1rem;
+}
+
+/* Group Card */
+.group-card {
+  background-color: #fef9f0;
+  border: 1px solid var(--GRAY_LIGHT);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.group-card:hover {
+  background-color: #fef9f0;
+}
+
+/* Group Header (name + code) */
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.group-code {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--CARAMEL);
+}
+
+/* Group Details Section */
+.group-details {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--SILVER);
+}
+
+/* Member List */
+
+.group-member-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  margin-bottom: 10px;
+  background-color: white;
+  border: 1px solid var(--GRAY_LIGHT);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+
+.group-member-name {
+  font-weight: 500;
+  color: #333;
+  padding-left: 5px;
+}
+
+/* Kick Button */
+.kick-button {
+  background-color: var(--RED);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-left: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.kick-button:hover {
+  background-color: var(--RED);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .groups-button-group {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+.error-message {
+  color: var(--RED);
+  font-weight: 500;
+  margin-top: 1rem;
+}

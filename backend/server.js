@@ -1,8 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql2');
 const cors = require('cors');
+const admin = require('firebase-admin');
 const bcrypt = require('bcrypt'); //To hash passwords
+const db = require('../backend/FirebaseConfig');
 
 const app = express();
 const port = 3500;
@@ -12,45 +13,30 @@ app.use(cors());
 app.use(express.json());
 
 require('dotenv').config();
-
-// MySQL Connection Configuration
-const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME
-});
-
-// Connect to MySQL
-db.connect(err => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err);
-        return;
-    }
-    console.log('Connected to MySQL database');
-});
 // API Endpoint to handle user registration
-app.post('/signup', (req, res) => {
+app.post('/signup', async(req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
         return res.status(400).json({message:'Username and password are required'});
     }
+    const usersRef = db.ref('users');
+    const userRef = usersRef.child(username);
+
     try {
-        const hashedPassword = bcrypt.hashSync(password, 10);
-        const INSERT_USER_QUERY = `INSERT INTO user (username, password) VALUES (?, ?)`;
-        db.query(INSERT_USER_QUERY, [username, hashedPassword], (err, results) => {
-            if (err) {
-                console.error('Error inserting user:', err);
-                res.status(500).json({error:'Error inserting user'});
-                return;
-            }
-            console.log('User inserted successfully');
-            res.status(200).json({message:'User inserted successfully'});
-        });
-    } catch (error) {
-        console.error('Error hashing password:', error);
-        res.status(500).json({error:'Error hashing password'});
+        // Check if user already exists
+        const snapshot = await userRef.once('value');
+        if (snapshot.exists()) {
+            return res.status(409).json({ error: 'Username already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await userRef.set({ password: hashedPassword });
+
+        return res.status(200).json({ message: 'User registered successfully!' });
+    } catch (err) {
+        console.error('Signup error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -59,35 +45,184 @@ app.post('/login', async(req, res) => {
     if (!username || !password) {
         return res.status(400).json({message:'Username and password are required'});
     }
-    const SELECT_USER_QUERY = `SELECT * FROM user WHERE username = ?`;
-    
-    try {
-        const results = await new Promise((resolve, reject) => {
-            db.query(SELECT_USER_QUERY, [username], (err, results) => {
-                if (err) reject(err);
-                else resolve(results);
-            });
-        });
+    const userRef = db.ref(`users/${username}`);
 
-        if (results.length === 0) {
-            return res.status(404).json({ error: 'User not found. Please enter another username or sign up!' });
+    try {
+        const snapshot = await userRef.once('value');
+        if (!snapshot.exists()) {
+            return res.status(404).json({ error: 'User not found' });
         }
 
-        const user = results[0];
+        const userData = snapshot.val();
+        const isMatch = await bcrypt.compare(password, userData.password);
 
-        // Compare passwords using bcrypt
-        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ error: 'Incorrect password' });
         }
-        return res.status(200).json({ message: 'Login successful!' });
 
-    } catch (error) {
-        console.error('Error during login:', error);
-        return res.status(500).json({ error: 'Error processing request' });
+        return res.status(200).json({ message: 'Login successful!', username });
+    } catch (err) {
+        console.error('Login error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// Create group route
+app.post('/groups', async (req, res) => {
+    const { name, description, code, createdBy } = req.body;
+
+    if (!name || !description || !code || !createdBy) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    try {
+        const groupsRef = db.ref('groups');
+        const newGroupRef = groupsRef.push(); // Auto-generate key
+        const groupData = {
+            name,
+            description,
+            code,
+            createdBy,
+            members: [createdBy],
+            createdAt: Date.now()
+        };
+
+        await newGroupRef.set(groupData);
+
+        return res.status(200).json({ message: 'Group created successfully!', groupId: newGroupRef.key });
+    } catch (err) {
+        console.error('Group creation error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+app.post('/groups/join', async (req, res) => {
+    const { code, username } = req.body;
+
+    if (!code || !username) {
+        return res.status(400).json({ error: 'Group code and username are required' });
+    }
+
+    try {
+        const groupsRef = db.ref('groups');
+        const snapshot = await groupsRef.once('value');
+        let found = false;
+
+        snapshot.forEach(child => {
+            const group = child.val();
+            if (group.code === code) {
+                found = true;
+                const members = group.members || [];
+
+                if (members.includes(username)) {
+                    return res.status(409).json({ error: 'User already a member of this group' });
+                }
+
+                members.push(username);
+                db.ref(`groups/${child.key}/members`).set(members);
+
+                return res.status(200).json({ message: 'Successfully joined group!', groupId: child.key });
+            }
+        });
+
+        if (!found) {
+            return res.status(404).json({ error: 'Group not found with provided code' });
+        }
+    } catch (err) {
+        console.error('Join group error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// Get groups for a specific user
+app.get('/groups/user/:username', async (req, res) => {
+    const username = req.params.username;
+
+    try {
+        const groupsRef = db.ref('groups');
+        const snapshot = await groupsRef.once('value');
+
+        const userGroups = [];
+
+        snapshot.forEach(child => {
+            const group = child.val();
+            if (group.createdBy === username || (group.members && group.members.includes(username))) {
+                userGroups.push({
+                    id: child.key,
+                    ...group
+                });
+            }
+        });
+
+        return res.status(200).json(userGroups);
+    } catch (err) {
+        console.error('Fetch user groups error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// Delete (disband) a group
+app.delete('/groups/:groupId', async (req, res) => {
+    const { groupId } = req.params;
+    try {
+        const groupRef = db.ref(`groups/${groupId}`);
+        const snapshot = await groupRef.once('value');
+        if (!snapshot.exists()) return res.status(404).json({ error: 'Group not found' });
+
+        await groupRef.remove();
+        res.status(200).json({ message: 'Group disbanded successfully' });
+    } catch (err) {
+        console.error('Disband group error:', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
+// Leave a group
+app.post('/groups/:groupId/leave', async (req, res) => {
+    const { groupId } = req.params;
+    const { username } = req.body;
+
+    if (!username) return res.status(400).json({ error: 'Username required' });
+
+    try {
+        const groupRef = db.ref(`groups/${groupId}`);
+        const snapshot = await groupRef.once('value');
+        if (!snapshot.exists()) return res.status(404).json({ error: 'Group not found' });
+
+        const group = snapshot.val();
+        const updatedMembers = group.members.filter(member => member !== username);
+
+        await groupRef.update({ members: updatedMembers });
+        res.status(200).json({ message: 'Left the group successfully' });
+    } catch (err) {
+        console.error('Leave group error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// Kick a user from a group
+app.post('/groups/:groupId/kick', async (req, res) => {
+    const { groupId } = req.params;
+    const { targetUsername } = req.body;
+  
+    if (!targetUsername) return res.status(400).json({ error: 'Target username required' });
+  
+    try {
+      const groupRef = db.ref(`groups/${groupId}`);
+      const snapshot = await groupRef.once('value');
+      if (!snapshot.exists()) return res.status(404).json({ error: 'Group not found' });
+  
+      const group = snapshot.val();
+  
+      // Don't allow creator to be kicked
+      if (targetUsername === group.createdBy) {
+        return res.status(403).json({ error: 'Cannot kick the group creator' });
+      }
+  
+      const updatedMembers = group.members.filter((m) => m !== targetUsername);
+      await groupRef.update({ members: updatedMembers });
+  
+      res.status(200).json({ message: `Kicked ${targetUsername} from the group` });
+    } catch (err) {
+      console.error('Kick user error:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
