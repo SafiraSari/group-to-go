@@ -24,6 +24,9 @@ const LoginPage = () => {
                 },
                 body: JSON.stringify({ username, password }),
             });
+    
+            const resData = await response.json(); 
+    
             if (!response.ok) {
                 console.log('Login failed');
                 if (response.status === 401) {
@@ -35,16 +38,16 @@ const LoginPage = () => {
                 if (response.status === 404) {
                     SetError('User not found. Please enter another username or signup!');
                 }
-            }
-            else {
-                console.log('Login successful');
-                navigate('/');
+            } else {
+                
+                localStorage.setItem('username', resData.username);
+                console.log('Login successful as:', resData.username);
+                navigate('/groups');
             }
         } catch (error) {
-            SetError('Error connecting to server')
+            SetError('Error connecting to server');
         }
-
-    }
+    };
     return (
         <div className="split-container">
             <div className="login-container"> {/*Left side - Login form */}

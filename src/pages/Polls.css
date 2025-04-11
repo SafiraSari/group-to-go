@@ -32,7 +32,7 @@
   margin-top: 10px;
 }
 
-.header-title h1 {
+.polls-header-title h1 {
   text-align:center;
   text-transform:uppercase;
   font-size: 30px; letter-spacing:1px;
@@ -43,7 +43,7 @@
   grid-gap: 22px;
 }
  
-.header-title h1:after, .header-title h1:before {
+.polls-header-title h1:after, .polls-header-title h1:before {
   content: " ";
   display: block;
   border-bottom: 2px solid var(--SANDY);
