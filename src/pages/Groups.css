@@ -41,13 +41,14 @@
 
 /* Group List Container */
 .groups-list {
+  margin: 0 auto;
   width: 80%;
-  margin-top: 2rem;
+  padding-top: 1rem;
 }
 
 /* Group Card */
 .group-card {
-  background-color: var(--OFF_WHITE);
+  background-color: #fef9f0;
   border: 1px solid var(--GRAY_LIGHT);
   border-radius: 12px;
   padding: 1rem 1.5rem;
@@ -68,7 +69,7 @@
 }
 
 .group-code {
-  font-size: 0.9rem;
+  font-size: 1.3rem;
   font-weight: bold;
   color: var(--CARAMEL);
 }
@@ -81,27 +82,19 @@
 }
 
 /* Member List */
-.group-members-list {
-  padding: 0;
-  margin-top: 10px;
-  list-style-type: none;
-  border-top: 1px solid #ddd;
-}
 
 .group-member-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 10px;
-  border-bottom: 1px solid #eee;
-  margin: 0;
-  background-color: #fdfdfd;
-  transition: background-color 0.3s ease;
+  padding: 10px 16px;
+  margin-bottom: 10px;
+  background-color: white;
+  border: 1px solid var(--GRAY_LIGHT);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 
-.group-member-row:hover {
-  background-color: #f9f5f1;
-}
 
 .group-member-name {
   font-weight: 500;
