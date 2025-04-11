@@ -33,6 +33,8 @@ const Polls = () => {
   const [question, setQuestion] = useState("");
   const [notes, setNotes] = useState("");
   const [polls, setPolls] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pollsUpdated, setPollsUpdated] = useState(false);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -48,19 +50,54 @@ const Polls = () => {
     if (username) fetchGroups();
   }, [username]);
 
-  useEffect(() => {
-    const fetchPolls = async () => {
-      try {
-        const res = await fetch(`http://localhost:3500/polls/user/${username}`);
-        const data = await res.json();
-        if (res.ok) setPolls(data);
-        else console.error("Error loading polls.");
-      } catch (err) {
-        console.error("Error fetching polls:", err);
+  // Separate function to fetch polls that we can reuse
+  const fetchPolls = async () => {
+    setLoading(true);
+    try {
+      console.log("Fetching polls for user:", username);
+      const res = await fetch(`http://localhost:3500/polls/user/${username}`);
+      const data = await res.json();
+      console.log("Polls data received:", data);
+      
+      if (res.ok && Array.isArray(data)) {
+        if (data.length === 0) {
+          console.log("No polls found for this user");
+          setPolls([]);
+        } else {
+          // Transform the data properly
+          const accordionItems = data.map(poll => ({
+            title: `[${poll.groupName || 'Unknown Group'}] - ${poll.category.toUpperCase()} - ${poll.pollName}`,
+            content: (
+              <PollContent
+                question={poll.question}
+                category={CATEGORIES.find((c) => c.name === poll.category) || CATEGORIES[0]}
+                options={poll.options}
+                notes={poll.notes}
+                pollId={poll.id}
+                groupId={poll.groupId}
+              />
+            )
+          }));
+          setPolls(accordionItems);
+        }
+      } else {
+        console.error("Error loading polls:", data.error || "Unknown error");
+        setPolls([]);
       }
-    };
-    if (username) fetchPolls();
-  }, [username]);
+    } catch (err) {
+      console.error("Error fetching polls:", err);
+      setPolls([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Effect to fetch polls when component mounts or pollsUpdated changes
+  useEffect(() => {
+    if (username) {
+      fetchPolls();
+    }
+  }, [username, pollsUpdated]);
 
   const removeOption = () => {
     if (options.length > 2) {
@@ -87,8 +124,12 @@ const Polls = () => {
       setOptionError("Please fill all fields and ensure options are not empty.");
       return;
     }
-
+  
     try {
+      console.log("Creating poll with data:", { 
+        pollName, question, notes, options, groupId, category: selectedCategory.name, createdBy: username 
+      });
+      
       const res = await fetch("http://localhost:3500/polls", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,16 +138,19 @@ const Polls = () => {
           question,
           notes,
           options,
-          groupId,
+          groupId, // Make sure this is the actual group ID, not the code
           category: selectedCategory.name,
           createdBy: username,
         }),
       });
-
+  
       const data = await res.json();
+      console.log("Poll creation response:", data);
+      
       if (res.ok) {
-        setPolls((prev) => [...prev, { ...data.poll, id: data.id }]);
         resetModal();
+        // Trigger refetch by toggling pollsUpdated
+        setPollsUpdated(prev => !prev);
       } else {
         setOptionError(data.error || "Failed to save poll.");
       }
@@ -127,10 +171,29 @@ const Polls = () => {
     setOptionError("");
   };
 
-  const PollContent = ({ question, category, options, notes }) => {
+  const PollContent = ({ question, category, options, notes, pollId, groupId }) => {
     const [selectedOption, setSelectedOption] = useState(null);
+    
+    const handleVote = async () => {
+      if (!selectedOption) {
+        alert("Please select an option to vote!");
+        return;
+      }
+
+      // Here you would implement voting functionality
+      console.log(`Submitting vote for poll ${pollId} in group ${groupId}: ${selectedOption}`);
+      alert(`You voted for: ${selectedOption}`);
+      
+      // In a real implementation, you would send this vote to your backend
+      // const res = await fetch(`http://localhost:3500/polls/${pollId}/vote`, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ username, option: selectedOption }),
+      // });
+    };
+    
     return (
-      <div>
+      <div className="poll-content">
         <p><strong>Question:</strong> {question}</p>
         <div className="poll-content-category">
           <img src={category.icon} alt={category.name} />
@@ -147,7 +210,11 @@ const Polls = () => {
           ))}
         </div>
         {notes && <p style={{ fontStyle: "italic", color: "#666" }}>{notes}</p>}
-        <Button label="Submit Answer" variant="green" onClick={() => alert(`You voted for: ${selectedOption || "Nothing selected"}`)} />
+        <Button 
+          label="Submit Answer" 
+          variant="green" 
+          onClick={handleVote} 
+        />
       </div>
     );
   };
@@ -162,19 +229,13 @@ const Polls = () => {
 
         <Button label="+ Create New Poll" onClick={() => setModalOpen(true)} />
 
-        <Accordion
-          items={polls.map((poll) => ({
-            title: `[Pending] - ${poll.category.toUpperCase()}`,
-            content: (
-              <PollContent
-                question={poll.question}
-                category={CATEGORIES.find((c) => c.name === poll.category) || CATEGORIES[0]}
-                options={poll.options}
-                notes={poll.notes}
-              />
-            ),
-          }))}
-        />
+        {loading ? (
+          <p>Loading polls...</p>
+        ) : polls.length > 0 ? (
+          <Accordion items={polls} />
+        ) : (
+          <p>No polls found. Create a new poll!</p>
+        )}
 
         {modalOpen && (
           <Modal onSubmit={handleCreatePoll} onCancel={resetModal} onClose={resetModal}>
@@ -185,7 +246,7 @@ const Polls = () => {
               <select value={groupId} onChange={(e) => setGroupId(e.target.value)}>
                 <option value="">-- Select a group --</option>
                 {groups.map((group) => (
-                  <option key={group.code} value={group.code}>
+                  <option key={group.id} value={group.id}>
                     {group.name}
                   </option>
                 ))}
