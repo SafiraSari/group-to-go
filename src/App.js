@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/Login";
-import Home from "./pages/Home";
 import Groups from "./pages/Groups";
 import Events from "./pages/Events";
 import Schedule from "./pages/Schedule";
@@ -8,13 +7,14 @@ import Maps from "./pages/Map";
 import SignupPage from "./pages/Signup";
 import Expenses from "./pages/Expenses";
 import Polls from "./pages/Polls";
+import Landing from "./pages/Landing";
 
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/groups" element={<Groups />} />
           <Route path="/events" element={<Events />} />
           <Route path="/schedule" element={<Schedule />} />

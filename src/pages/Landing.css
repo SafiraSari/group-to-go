@@ -1,0 +1,129 @@
+.landing-wrapper {
+  background: linear-gradient(270deg, var(--EMERALD), var(--TEAGREEN), var(--JASMINE), var(--SANDY));
+  background-size: 800% 800%;
+  animation: gradientAnimation 10s ease infinite;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.landing-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 4rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes gradientAnimation { /* Animation for gradient */
+  0% {
+      background-position: 0% 50%;
+  }
+  50% {
+      background-position: 100% 50%;
+  }
+  100% {
+      background-position: 0% 50%;
+  }
+}
+
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.landing-logo {
+  height: 100px;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
+  padding: 0.6rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn.login {
+  background: rgba(255, 255, 255, 0.3);
+  color: #696863;
+  border-color: #696863;
+}
+
+.btn.login:hover {
+  background-color: var(--SANDY);
+  color: white;
+}
+
+.btn.signup {
+  background-color: #94D498;
+  color: white;
+  border-color: #696863;
+}
+
+.btn.signup:hover {
+  background-color: var(--EMERALD);
+}
+
+.landing-main {
+  max-width: 960px;
+  margin: auto;
+  padding: 5rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  text-align: center;
+  z-index: 1;
+  position: relative;
+}
+
+.main-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.5rem;
+}
+
+.main-subtitle {
+  font-size: 1.3rem;
+  color: var(--GRAY);
+  margin-bottom: 2.5rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.feature-box {
+  background-color: white;
+  border-left: 5px solid var(--JASMINE);
+  padding: 1.5rem 1rem;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #444;
+  text-align: left;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.feature-box:hover {
+  transform: translateY(-6px);
+  border-color: var(--SANDY);
+}

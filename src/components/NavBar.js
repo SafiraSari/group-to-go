@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import logout from "../assets/logout.png";
 import logo from "../assets/logo_horizontal.png"
-import home from "../assets/home.png"
 import groups from "../assets/groups.png"
 import events from "../assets/events.png"
 import schedule from "../assets/schedule.png"
@@ -15,7 +14,6 @@ const NavBar = () => {
   const currentPath = location.pathname;
 
   const navTabs = [
-    { path: "/", label: "Home", icon: home },
     { path: "/groups", label: "Groups", icon: groups },
     { path: "/map", label: "Map", icon: map },
     { path: "/events", label: "Events", icon: events },
@@ -27,7 +25,7 @@ const NavBar = () => {
 
   return (
     <div className="nav-bar">
-      <Link to="/">
+      <Link to="/groups">
         <img src={logo} alt="Logo" className="logo" />
       </Link>
       <div className="nav-container">
