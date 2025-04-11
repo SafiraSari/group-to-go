@@ -4,7 +4,7 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import Modal from "../components/Modal";
 import Confirmation from "../components/Confirmation";
-import "./Events.css";
+import './Events.css';
 
 const categories = [
   "General", "Food", "Games", "Sports", "Party"
@@ -100,21 +100,9 @@ const getCountdown = (dateStr, timeStr) => {
   return `${days}d ${hours}h ${minutes}m`;
 };
 
-  useEffect(() => {
-    if (!selectedEvent) return;
-
-    const updateCountdown = () => {
-      setSelectedCountdown(getCountdown(selectedEvent.createdAt));
-    };
-
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, [selectedEvent]);
-
   const handleCreateEvent = async () => {
 
-    const newEventID = generateEventId();
+    const newEventID = generateUniqueEventID();
 
     const newEvent = {
       id: newEventID,
@@ -339,8 +327,7 @@ const getCountdown = (dateStr, timeStr) => {
 
       <ul className="event-list-items">
           {events.map((event) => (
-            <li
-              key={event.id}
+            <li key={event.id}
               className="event-card"
               onClick={() => {
                 setSelectedEvent(event); // opens modal with event details
@@ -348,12 +335,13 @@ const getCountdown = (dateStr, timeStr) => {
               }}
             >
               <h3>{event.eventName}</h3>
-              <p><strong>Category:</strong> {event.Category}</p>
-              <p><strong>Date:</strong> {event.Date}</p>
-              <p className="countdown">
-                <strong>Countdown:</strong> {getCountdown(event.Date, event.Time)}
-              </p>
-              <p> Status: {getStatus(event.Date, event.Time)}</p>
+              
+                <p><strong>Category:</strong> {event.Category}</p>
+                <p><strong>Date:</strong> {event.Date}</p>
+                <p className="countdown">
+                  <strong>Countdown:</strong> {getCountdown(event.Date, event.Time)}</p>
+                <p> Status: {getStatus(event.Date, event.Time)}</p>
+              
             </li>
           ))}
         </ul>
