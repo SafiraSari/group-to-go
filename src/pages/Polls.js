@@ -3,6 +3,8 @@ import NavBar from "../components/NavBar";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Modal from "../components/Modal";
+import Accordion from "../components/Accordion";
+import ButtonOption from "../components/ButtonOption";
 import activity from "../assets/option_activity.png"
 import budget from "../assets/option_budget.png"
 import food from "../assets/option_food.png"
@@ -10,7 +12,8 @@ import poll from "../assets/option_poll.png"
 import time from "../assets/option_time.png"
 import "./Polls.css";
 
-const categories = [
+
+const CATEGORIES = [
   { name: "General", icon: poll },
   { name: "Food", icon: food },
   { name: "Activity", icon: activity },
@@ -18,9 +21,15 @@ const categories = [
   { name: "Budget", icon: budget },
 ];
 
+const STATUS = [
+  "Pending",
+  "Completed",
+  "Closed",
+]
+
 const Polls = () => {
   const [options, setOptions] = useState(["", ""]);
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[0]);
   const [modalOpen, setModalOpen] = useState(false)
   const [optionError, setOptionError] = useState("");
 
@@ -45,29 +54,88 @@ const Polls = () => {
 
   const handleButtonClick = () => {
     setModalOpen(false)
-    setSelectedCategory(categories[0])
+    setSelectedCategory(CATEGORIES[0])
     setOptionError("")
   }
 
+  const PollContent = ({ question, category, options, notes }) => {
+    const [selectedOption, setSelectedOption] = useState(null);
+  
+    return (
+      <div>
+        <p><strong>Question:</strong> {question}</p>
+        <div className="poll-content-category">
+          <img src={category.icon} alt={category.name}/>
+          <span><strong>Category:</strong> {category.name}</span>
+        </div>
+  
+        <div className="poll-content-options">
+          {options.map((option, index) => (
+            <ButtonOption key={index} label={option} onClick={() => setSelectedOption(option)} selected={selectedOption === option} />
+          ))}
+        </div>
+  
+        {notes && <p style={{ fontStyle: "italic", color: "#666" }}>{notes}</p>}
+
+        <Button label="Submit Answer" variant="green" onClick={() => alert(`You voted for: ${selectedOption || "Nothing selected"}`)}/>
+  
+      </div>
+    );
+  };
+  
+  const polls = [
+    {
+      title: "[Pending] - FOOD",
+      content: (
+        <PollContent
+          question="What should we eat?"
+          category={{ name: "Food", icon: food }}
+          options={["Burgers", "Sushi", "Pizza", "Ramen"]}
+        />
+      ),
+    },
+    {
+      title: "[Pending] - ACTIVITY",
+      content: (
+        <PollContent
+          question="What should we do?"
+          category={{ name: "Activity", icon: activity }}
+          options={["Picnic", "Escape Room", "Volleyball", "Walk around lake"]}
+          notes="SPRING IS COMING = SUNNY WEATHER!"
+        />
+      ),
+    },
+  ];
+  
   return (
     <>
       <NavBar />
       <div className="polls-container">
 
-        <div className="polls-header-title">
+        <div className="header-title">
           <h1>POLLS</h1>
         </div>
 
-        <Button label="+ Create New Poll" onClick={() => setModalOpen(true)} />
-
+        <div>
+          <Button label="+ Create New Poll" onClick={() => setModalOpen(true)} />
+        </div>
+        
+        <div>
+          <Accordion items={polls} />
+        </div>
+        
         {modalOpen && (        
           <Modal onSubmit={handleButtonClick} onCancel={handleButtonClick} onClose={handleButtonClick} >
             <h1>CREATING NEW POLL</h1>
-            <Input label="Poll Name" placeholder="Poll Name" isRequired />
+            <Input label="Enter the Poll Name" placeholder="Poll Name" isRequired />
+
+            <Input label="Enter the Group ID" placeholder="GroupID" isRequired />
+
+            <Input label="Enter the Poll Question" placeholder="Question" isRequired />
             
             <h3>Select a Category: <span style={{ fontWeight: 'bold' }}>{selectedCategory.name}</span></h3>
             <div className="option-button">
-              {categories.map((category, index) => (
+              {CATEGORIES.map((category, index) => (
                 <Button key={index} label={category.name} onClick={() => setSelectedCategory(category)}/>
               ))}
             </div>
@@ -90,7 +158,7 @@ const Polls = () => {
                 <Button label="+ Add Option" onClick={addOption} />
               </div>
             </div>
-            <Input label="Notes" type="text" placeholder="Enter any additional details..." />
+            <Input label="Enter any additional details" type="text" placeholder="Notes" />
           </Modal>
         )}
       </div>
