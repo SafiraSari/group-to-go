@@ -108,7 +108,7 @@ const Expenses = () => {
       console.error("Error deleting expense:", err);
     }
   };
-  
+
   const handleCalculate = async () => {
     if (!price || selectedMembers.length === 0 || !eventName || !groupId.trim()) {
       setErrorMessage("All fields are required, including at least one member.");
@@ -136,7 +136,7 @@ const Expenses = () => {
       if (!res.ok) {
         setErrorMessage(data.error || "Failed to save expense.");
       } else {
-        setUserExpenses((prev) => [...prev, { ...data.expense, id: data.id }]);
+        setUserExpenses((prev) => [...prev, { ...data.expense, id: data.id, groupId: groupId.trim() }]);
         setModalOpen(false);
       }
     } catch (err) {
@@ -184,15 +184,19 @@ const Expenses = () => {
             {members.length > 0 && (
               <div className="member-checkboxes">
                 <p>Select members to split:</p>
-                {members.map((member) => (
-                  <label key={member} className="checkbox-member">
-                    <input type="checkbox" checked={selectedMembers.includes(member)} onChange={() => handleToggleMember(member)} />
-                    {member}
-                  </label>
-                ))}
+                <div className="member-buttons-container">
+                  {members.map((member) => (
+                    <div
+                      key={member}
+                      className={`checkbox-member ${selectedMembers.includes(member) ? 'selected' : ''}`}
+                      onClick={() => handleToggleMember(member)}
+                    >
+                      {member}
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
-
+            )}           
             {errorMessage && <p className="error-message" style={{ color: "var(--RED)" }}>{errorMessage}</p>}
 
             <div className="button-group">
@@ -209,14 +213,13 @@ const Expenses = () => {
         )}
 
         <div className="expenses-list">
-          <h2>Your Expenses</h2>
           {userExpenses.length === 0 ? (
             <p style={{ color: "var(--GRAY)" }}>No expenses to show.</p>
           ) : (
             userExpenses.map((exp, index) => (
               <div
                 key={exp.id || index}
-                className="group-card"
+                className="group-card-expense"
                 onClick={() => toggleExpenseDetails(index)}
               >
                 <div className="group-header">
