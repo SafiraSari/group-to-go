@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Groups from "./pages/Groups";
 import Events from "./pages/Events";
 import Schedule from "./pages/Schedule";
+import Maps from "./pages/Map";
 import SignupPage from "./pages/Signup";
 import Expenses from "./pages/Expenses";
 import Polls from "./pages/Polls";
@@ -20,6 +21,7 @@ function App() {
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/polls" element={<Polls />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/map" element={<Maps/>} />
           <Route path="/signup" element={<SignupPage />} />
         </Routes>
       </div>
