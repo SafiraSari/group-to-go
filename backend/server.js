@@ -233,7 +233,8 @@ app.post('/groups/:groupId/kick', async (req, res) => {
     }
   
     try {
-      const pollsRef = db.ref(`polls/${groupId}`).push();
+      // Save poll directly under "polls/" instead of "polls/<groupId>/..."
+      const pollsRef = db.ref("polls").push();
       const newPoll = {
         pollName,
         question,
@@ -241,7 +242,10 @@ app.post('/groups/:groupId/kick', async (req, res) => {
         options,
         category,
         createdBy,
+        groupId, // Keep groupId for filtering
         createdAt: Date.now(),
+        status: "Pending",
+        votes: {}  // Empty initially
       };
   
       await pollsRef.set(newPoll);
@@ -257,50 +261,133 @@ app.post('/groups/:groupId/kick', async (req, res) => {
   
     try {
       console.log(`Fetching polls for user: ${username}`);
-      
-      // First get all groups the user is in
+  
       const groupsRef = db.ref("groups");
       const groupsSnap = await groupsRef.once("value");
-      
-      // Get all polls
-      const pollsRef = db.ref("polls");
-      const pollsSnap = await pollsRef.once("value");
-      
-      const result = [];
-      
-      // Loop through all groups
-      groupsSnap.forEach((groupChild) => {
+  
+      const userGroupCodes = {}; // key: groupCode, value: { name, members }
+      groupsSnap.forEach(groupChild => {
         const group = groupChild.val();
-        const groupId = groupChild.key;
-        
-        // Check if user is member or creator of this group
-        if (group.members?.includes(username) || group.createdBy === username) {
-          // Get polls for this group
-          const groupPolls = pollsSnap.child(groupId);
-          
-          if (groupPolls.exists()) {
-            console.log(`Found polls for group ${groupId}: ${group.name}`);
-            
-            // Loop through polls in this group
-            groupPolls.forEach((pollChild) => {
-              const poll = pollChild.val();
-              result.push({
-                ...poll,
-                id: pollChild.key,
-                groupId,
-                groupCode: group.code,
-                groupName: group.name
-              });
-            });
-          }
+        if (group.createdBy === username || (group.members && group.members.includes(username))) {
+          userGroupCodes[group.code] = {
+            name: group.name,
+            members: group.members || [],
+          };
         }
       });
-      
+  
+      // ✅ Now we match by poll.groupId === group.code
+      const pollsRef = db.ref("polls");
+      const pollsSnap = await pollsRef.once("value");
+  
+      const result = [];
+  
+      pollsSnap.forEach(pollChild => {
+        const poll = pollChild.val();
+        const groupCode = poll.groupId;
+        const groupInfo = userGroupCodes[groupCode];
+  
+        if (groupInfo) {
+          const hasVoted = poll.votes && poll.votes[username];
+          const totalVotes = poll.votes ? Object.keys(poll.votes).length : 0;
+  
+          result.push({
+            ...poll,
+            id: pollChild.key,
+            groupCode,
+            groupName: groupInfo.name,
+            hasVoted,
+            status: poll.status || 'pending',
+            totalMembers: groupInfo.members.length,
+            totalVotes
+          });
+        }
+      });
+  
       console.log(`Found ${result.length} polls for user ${username}`);
-      res.status(200).json(result);
+      return res.status(200).json(result);
     } catch (err) {
       console.error("Error fetching polls:", err);
-      res.status(500).json({ error: "Failed to fetch polls" });
+      return res.status(500).json({ error: "Failed to fetch polls" });
+    }
+  });
+  app.post('/polls/:pollId/vote', async (req, res) => {
+    const { pollId } = req.params;
+    const { username, option, groupId } = req.body;
+  
+    if (!username || !option || !groupId) {
+      return res.status(400).json({ error: 'Username, option, and groupId are required' });
+    }
+  
+    try {
+      // Get the group to check members
+      const groupRef = db.ref(`groups`);
+      const groupSnap = await groupRef.once('value');
+      let targetGroup = null;
+  
+      groupSnap.forEach(child => {
+        const g = child.val();
+        if (g.code === groupId) {
+          targetGroup = { ...g, key: child.key };
+        }
+      });
+  
+      if (!targetGroup) {
+        return res.status(404).json({ error: 'Group not found' });
+      }
+  
+      // Get the poll from flat /polls
+      const pollRef = db.ref(`polls/${pollId}`);
+      const pollSnap = await pollRef.once('value');
+  
+      if (!pollSnap.exists()) {
+        return res.status(404).json({ error: 'Poll not found' });
+      }
+  
+      const poll = pollSnap.val();
+  
+      // Initialize votes if not present
+      if (!poll.votes) {
+        poll.votes = {};
+      }
+  
+      // Record the vote
+      poll.votes[username] = option;
+  
+      const totalMembers = targetGroup.members ? targetGroup.members.length : 0;
+      const totalVotes = Object.keys(poll.votes).length;
+  
+      // If all members voted, mark as completed and tally
+      if (totalVotes >= totalMembers) {
+        poll.status = 'completed';
+  
+        const results = {};
+        poll.options.forEach(opt => results[opt] = 0);
+  
+        Object.values(poll.votes).forEach(v => {
+          results[v] = (results[v] || 0) + 1;
+        });
+  
+        poll.results = results;
+      } else {
+        poll.status = 'pending';
+      }
+  
+      await pollRef.update({
+        votes: poll.votes,
+        status: poll.status,
+        results: poll.results || null
+      });
+  
+      return res.status(200).json({
+        message: 'Vote recorded',
+        pollStatus: poll.status,
+        votesCount: totalVotes,
+        totalMembers
+      });
+    } catch (err) {
+      console.error('Voting error:', err);
+      return res.status(500).json({ error: 'Internal server error' });
     }
   });
 // Start the Express server

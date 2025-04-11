@@ -50,7 +50,7 @@ const Polls = () => {
     if (username) fetchGroups();
   }, [username]);
 
-  // Separate function to fetch polls that we can reuse
+  // Fetch polls function
   const fetchPolls = async () => {
     setLoading(true);
     try {
@@ -66,15 +66,12 @@ const Polls = () => {
         } else {
           // Transform the data properly
           const accordionItems = data.map(poll => ({
-            title: `[${poll.groupName || 'Unknown Group'}] - ${poll.category.toUpperCase()} - ${poll.pollName}`,
+            title: `[${poll.status === 'completed' ? 'Completed' : 'Pending'}] - ${poll.category.toUpperCase()} - ${poll.pollName}`,
             content: (
               <PollContent
-                question={poll.question}
+                poll={poll}
                 category={CATEGORIES.find((c) => c.name === poll.category) || CATEGORIES[0]}
-                options={poll.options}
-                notes={poll.notes}
-                pollId={poll.id}
-                groupId={poll.groupId}
+                onVoteSubmitted={() => setPollsUpdated(prev => !prev)}
               />
             )
           }));
@@ -92,7 +89,6 @@ const Polls = () => {
     }
   };
 
-  // Effect to fetch polls when component mounts or pollsUpdated changes
   useEffect(() => {
     if (username) {
       fetchPolls();
@@ -124,7 +120,7 @@ const Polls = () => {
       setOptionError("Please fill all fields and ensure options are not empty.");
       return;
     }
-  
+
     try {
       console.log("Creating poll with data:", { 
         pollName, question, notes, options, groupId, category: selectedCategory.name, createdBy: username 
@@ -138,18 +134,20 @@ const Polls = () => {
           question,
           notes,
           options,
-          groupId, // Make sure this is the actual group ID, not the code
+          groupId,
           category: selectedCategory.name,
           createdBy: username,
+          status: "pending", // Initialize with pending status
+          votes: {} // Initialize with empty votes object
         }),
       });
-  
+
       const data = await res.json();
       console.log("Poll creation response:", data);
       
       if (res.ok) {
         resetModal();
-        // Trigger refetch by toggling pollsUpdated
+        // Trigger refetch
         setPollsUpdated(prev => !prev);
       } else {
         setOptionError(data.error || "Failed to save poll.");
@@ -171,52 +169,137 @@ const Polls = () => {
     setOptionError("");
   };
 
-  const PollContent = ({ question, category, options, notes, pollId, groupId }) => {
+  const PollContent = ({ poll, category, onVoteSubmitted }) => {
     const [selectedOption, setSelectedOption] = useState(null);
+    const [voteSubmitting, setVoteSubmitting] = useState(false);
+    const [voteError, setVoteError] = useState("");
+    
+    // Pre-select the option if user has already voted
+    useEffect(() => {
+      if (poll.votes && poll.votes[username]) {
+        setSelectedOption(poll.votes[username]);
+      }
+    }, [poll]);
     
     const handleVote = async () => {
       if (!selectedOption) {
-        alert("Please select an option to vote!");
+        setVoteError("Please select an option to vote!");
         return;
       }
 
-      // Here you would implement voting functionality
-      console.log(`Submitting vote for poll ${pollId} in group ${groupId}: ${selectedOption}`);
-      alert(`You voted for: ${selectedOption}`);
-      
-      // In a real implementation, you would send this vote to your backend
-      // const res = await fetch(`http://localhost:3500/polls/${pollId}/vote`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ username, option: selectedOption }),
-      // });
+      setVoteSubmitting(true);
+      setVoteError("");
+
+      try {
+        const res = await fetch(`http://localhost:3500/polls/${poll.id}/vote`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            username, 
+            option: selectedOption,
+            groupId: poll.groupId
+          }),
+        });
+
+        const data = await res.json();
+        
+        if (res.ok) {
+          console.log("Vote submitted successfully:", data);
+          if (onVoteSubmitted) onVoteSubmitted();
+        } else {
+          setVoteError(data.error || "Failed to submit vote.");
+        }
+      } catch (err) {
+        console.error("Error submitting vote:", err);
+        setVoteError("Network error while submitting vote.");
+      } finally {
+        setVoteSubmitting(false);
+      }
     };
     
-    return (
-      <div className="poll-content">
-        <p><strong>Question:</strong> {question}</p>
-        <div className="poll-content-category">
-          <img src={category.icon} alt={category.name} />
-          <span><strong>Category:</strong> {category.name}</span>
+    // Render different content based on poll status
+    if (poll.status === 'completed') {
+      // For completed polls, show results
+      return (
+        <div className="poll-content">
+          <p><strong>Question:</strong> {poll.question}</p>
+          <div className="poll-content-category">
+            <img src={category.icon} alt={category.name} />
+            <span><strong>Category:</strong> {category.name}</span>
+          </div>
+          
+          <h3>Results:</h3>
+          <div className="poll-results">
+            {poll.options.map((option, index) => {
+              const votes = poll.results ? (poll.results[option] || 0) : 0;
+              const percentage = poll.totalVotes > 0 
+                ? Math.round((votes / poll.totalVotes) * 100) 
+                : 0;
+              
+              return (
+                <div key={index} className="poll-result-item">
+                  <div className="poll-result-option">
+                    {option} {poll.votes && poll.votes[username] === option && " (Your Vote)"}
+                  </div>
+                  <div className="poll-result-bar-container">
+                    <div 
+                      className="poll-result-bar" 
+                      style={{ width: `${percentage}%` }}
+                    ></div>
+                    <span className="poll-result-percentage">{percentage}% ({votes} votes)</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {notes && <p style={{ fontStyle: "italic", color: "#666" }}>{notes}</p>}
+          <p>All {poll.totalMembers} group members have voted.</p>
         </div>
-        <div className="poll-content-options">
-          {options.map((option, index) => (
-            <ButtonOption
-              key={index}
-              label={option}
-              onClick={() => setSelectedOption(option)}
-              selected={selectedOption === option}
+      );
+    } else {
+      // For pending polls, show voting interface
+      return (
+        <div className="poll-content">
+          <p><strong>Question:</strong> {poll.question}</p>
+          <div className="poll-content-category">
+            <img src={category.icon} alt={category.name} />
+            <span><strong>Category:</strong> {category.name}</span>
+          </div>
+          
+          <div className="poll-content-options">
+            {poll.options.map((option, index) => (
+              <ButtonOption
+                key={index}
+                label={option}
+                onClick={() => setSelectedOption(option)}
+                selected={selectedOption === option}
+                disabled={poll.hasVoted || voteSubmitting}
+              />
+            ))}
+          </div>
+          
+          {notes && <p style={{ fontStyle: "italic", color: "#666" }}>{notes}</p>}
+          
+          {voteError && <p className="error">{voteError}</p>}
+          
+          {poll.hasVoted ? (
+            <p>You already voted for: <strong>{poll.votes[username]}</strong></p>
+          ) : (
+            <Button 
+              label={voteSubmitting ? "Submitting..." : "Submit Answer"} 
+              variant="green" 
+              onClick={handleVote}
+              disabled={voteSubmitting} 
             />
-          ))}
+          )}
+          
+          <p className="poll-vote-count">
+            {poll.totalVotes} of {poll.totalMembers} members have voted.
+          </p>
         </div>
-        {notes && <p style={{ fontStyle: "italic", color: "#666" }}>{notes}</p>}
-        <Button 
-          label="Submit Answer" 
-          variant="green" 
-          onClick={handleVote} 
-        />
-      </div>
-    );
+      );
+    }
   };
 
   return (
@@ -226,9 +309,9 @@ const Polls = () => {
         <div className="header-title">
           <h1>POLLS</h1>
         </div>
-
+        <div className="create-poll-button-wrapper">
         <Button label="+ Create New Poll" onClick={() => setModalOpen(true)} />
-
+        </div>
         {loading ? (
           <p>Loading polls...</p>
         ) : polls.length > 0 ? (
@@ -246,7 +329,7 @@ const Polls = () => {
               <select value={groupId} onChange={(e) => setGroupId(e.target.value)}>
                 <option value="">-- Select a group --</option>
                 {groups.map((group) => (
-                  <option key={group.id} value={group.id}>
+                  <option key={group.code} value={group.code}>
                     {group.name}
                   </option>
                 ))}
