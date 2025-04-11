@@ -3,6 +3,7 @@ import NavBar from "../components/NavBar";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Modal from "../components/Modal";
+import Confirmation from "../components/Confirmation";
 import "./Expense.css";
 
 const Expenses = () => {
@@ -19,6 +20,18 @@ const Expenses = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [userExpenses, setUserExpenses] = useState([]);
   const [expandedExpenseIndex, setExpandedExpenseIndex] = useState(null);
+
+  const [confirmationLabel, setConfirmationLabel] = useState('');
+  const [onConfirmCallback, setOnConfirmCallback] = useState(() => () => { });
+
+  const triggerConfirmation = (label, onConfirm) => {
+    setConfirmationLabel(label);
+    setOnConfirmCallback(() => () => {
+      onConfirm();
+      setShowConfirmation(false);
+    });
+    setShowConfirmation(true);
+  };
 
   useEffect(() => {
     if (!modalOpen || !username) return;
@@ -115,12 +128,11 @@ const Expenses = () => {
       setErrorMessage("All fields are required, including at least one member.");
       return;
     }
-  
+
     const calculatedPrice = parseFloat(price) / selectedMembers.length;
     setPricePerPerson(calculatedPrice.toFixed(2));
     setErrorMessage("");
-    setShowConfirmation(true);
-  };  
+  };
 
   const handleConfirm = async () => {
     try {
@@ -135,21 +147,20 @@ const Expenses = () => {
           splitAmong: selectedMembers
         }),
       });
-  
+
       const data = await res.json();
       if (!res.ok) {
         setErrorMessage(data.error || "Failed to save expense.");
       } else {
         setUserExpenses((prev) => [...prev, { ...data.expense, id: data.id, groupId: groupId.trim() }]);
         setModalOpen(false);
-        setShowConfirmation(false);
       }
     } catch (err) {
       console.error("Error saving expense:", err);
       setErrorMessage("Network error while saving expense.");
     }
   };
-  
+
 
   const handleToggleMember = (member) => {
     setSelectedMembers((prev) =>
@@ -202,11 +213,11 @@ const Expenses = () => {
                   ))}
                 </div>
               </div>
-            )}           
+            )}
             {errorMessage && <p className="error-message" style={{ color: "var(--RED)" }}>{errorMessage}</p>}
 
             <div className="button-group">
-              <Button label="Split Amount" onClick={handleCalculate} disabled={!price || selectedMembers.length === 0}/>
+              <Button label="Split Amount" onClick={handleCalculate} disabled={!price || selectedMembers.length === 0} />
             </div>
 
             {pricePerPerson && (
@@ -252,7 +263,10 @@ const Expenses = () => {
                           variant="red"
                           onClick={(e) => {
                             e.stopPropagation();
-                            deleteExpense(exp.id, exp.groupId);
+                            triggerConfirmation(
+                              `delete the expense "${exp.eventName}"`,
+                              () => deleteExpense(exp.id, exp.groupId)
+                            );
                           }}
                         />
                       </div>
@@ -263,6 +277,13 @@ const Expenses = () => {
             ))
           )}
         </div>
+        {showConfirmation && (
+          <Confirmation
+            label={confirmationLabel}
+            onConfirm={onConfirmCallback}
+            onCancel={() => setShowConfirmation(false)}
+          />
+        )}
       </div>
     </>
   );
