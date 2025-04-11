@@ -235,7 +235,7 @@
 
 .checkbox-member.selected {
   background-color: var(--SANDY);
-  color: var(--DARK);
+  color: var(--GRAY);
   font-weight: 700;
   border-color: var(--GRAY);
 }

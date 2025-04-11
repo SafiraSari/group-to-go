@@ -13,6 +13,7 @@ const Expenses = () => {
   const [groupId, setGroupId] = useState("");
   const [groups, setGroups] = useState([]);
   const [members, setMembers] = useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [pricePerPerson, setPricePerPerson] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -109,16 +110,19 @@ const Expenses = () => {
     }
   };
 
-  const handleCalculate = async () => {
+  const handleCalculate = () => {
     if (!price || selectedMembers.length === 0 || !eventName || !groupId.trim()) {
       setErrorMessage("All fields are required, including at least one member.");
       return;
     }
-
+  
     const calculatedPrice = parseFloat(price) / selectedMembers.length;
     setPricePerPerson(calculatedPrice.toFixed(2));
     setErrorMessage("");
+    setShowConfirmation(true);
+  };  
 
+  const handleConfirm = async () => {
     try {
       const res = await fetch("http://localhost:3500/expenses", {
         method: "POST",
@@ -131,19 +135,21 @@ const Expenses = () => {
           splitAmong: selectedMembers
         }),
       });
-
+  
       const data = await res.json();
       if (!res.ok) {
         setErrorMessage(data.error || "Failed to save expense.");
       } else {
         setUserExpenses((prev) => [...prev, { ...data.expense, id: data.id, groupId: groupId.trim() }]);
         setModalOpen(false);
+        setShowConfirmation(false);
       }
     } catch (err) {
       console.error("Error saving expense:", err);
       setErrorMessage("Network error while saving expense.");
     }
   };
+  
 
   const handleToggleMember = (member) => {
     setSelectedMembers((prev) =>
@@ -163,7 +169,7 @@ const Expenses = () => {
         <Button label="+ Create New Expense" onClick={handleCreateClick} />
 
         {modalOpen && (
-          <Modal onSubmit={handleCancel} onCancel={handleCancel} onClose={handleCancel}>
+          <Modal onSubmit={handleConfirm} onCancel={handleCancel} onClose={handleCancel}>
             <h1>CREATING NEW EXPENSE</h1>
 
             <div className="input-wrapper">
@@ -200,7 +206,7 @@ const Expenses = () => {
             {errorMessage && <p className="error-message" style={{ color: "var(--RED)" }}>{errorMessage}</p>}
 
             <div className="button-group">
-              <Button label="Split Amount" onClick={handleCalculate} disabled={!price || selectedMembers.length === 0} />
+              <Button label="Split Amount" onClick={handleCalculate} disabled={!price || selectedMembers.length === 0}/>
             </div>
 
             {pricePerPerson && (
