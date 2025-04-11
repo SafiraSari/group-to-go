@@ -27,6 +27,7 @@ const Events = () => {
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
   const [deleteEvents, setdeleteEvents] = useState("");
+  const [id, setID] = useState("");
 
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -35,6 +36,23 @@ const Events = () => {
     setShowConfirm(true);
   };
 
+  const generateUniqueEventID = (prefix = 'EVT-') => {
+    // Get current timestamp in milliseconds
+    const timestamp = Date.now();
+    
+    // Generate a random number between 1000-9999
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    
+    // Create a random alphanumeric string (4 characters)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let randomStr = '';
+    for (let i = 0; i < 4; i++) {
+      randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    // Combine all parts to create the unique ID
+    return `${prefix}${timestamp}-${randomNum}-${randomStr}`;
+  };
 
   const getStatus = (dateStr, timeStr) => {
     if (!dateStr) return "No date set";
@@ -96,7 +114,10 @@ const getCountdown = (dateStr, timeStr) => {
 
   const handleCreateEvent = async () => {
 
+    const newEventID = generateEventId();
+
     const newEvent = {
+      id: newEventID,
       eventName,
       date,
       groupID,
@@ -141,14 +162,14 @@ const getCountdown = (dateStr, timeStr) => {
     }
   };
 
-  const handleEventDelete = async (eventName) => {
+  const handleEventDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3500/DeleteEvents/${eventName}`, {
+      const response = await fetch(`http://localhost:3500/DeleteEvents/${id}`, {
         method: 'DELETE',
       });
   
       if (response.ok) {
-        setEvents(prev => prev.filter(e => e.eventName !== eventName));
+        setEvents(prev => prev.filter(e => e.id !== id));
       } else {
         const error = await response.json();
         console.error('Failed to delete event:', error);
@@ -162,9 +183,10 @@ const getCountdown = (dateStr, timeStr) => {
     setSelectedEvent(null)
   };
   
-  const handleEventEdit = async (eventName) => {
+  const handleEventEdit = async (id) => {
 
     const updatedData = {
+      id,
       eventName,
       date,
       groupID,
@@ -176,7 +198,7 @@ const getCountdown = (dateStr, timeStr) => {
     };
 
     try {
-      const response = await fetch(`http://localhost:3500/EditEvents/${eventName}`, {
+      const response = await fetch(`http://localhost:3500/EditEvents/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData),
@@ -398,7 +420,7 @@ const getCountdown = (dateStr, timeStr) => {
             />
 
               <div className="option-button">
-                <Button label="Save" onClick={() => handleEventEdit(selectedEvent.eventName)} />
+                <Button label="Save" onClick={() => handleEventEdit(selectedEvent.id)} />
                 <Button label="Cancel" onClick={() => setIsEditing(false)} />
               </div>
             </>
@@ -414,7 +436,7 @@ const getCountdown = (dateStr, timeStr) => {
 
               <div className="option-button">
                 <Button label="Edit" onClick={() => setIsEditing(true)} />
-                <Button label="Delete" variant = "red" onClick={() =>  handleDeleteClick(selectedEvent.eventName)} />
+                <Button label="Delete" variant = "red" onClick={() =>  handleDeleteClick(selectedEvent.id)} />
               </div>
 
               {showConfirm && (

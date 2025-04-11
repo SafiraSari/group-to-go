@@ -68,18 +68,21 @@ app.post('/login', async(req, res) => {
 });
 
 app.post('/CreateEvents', async (req, res) => {
-    const { date, groupID, location, eventName,time, category, notes} = req.body;
+    const { date, groupID, location, eventName,time, category, notes, id} = req.body;
 
-    if (!date || !groupID || !location || !eventName|| !time || !category) {
+    console.log("id " + id);
+
+    if (!date || !groupID || !location || !eventName|| !time || !category || !id) {
         return res.status(400).json({ error: 'All fields (id, date, groupID, location, eventName, time) are required' });
     }
 
     try {
         
-        const eventRef = db.ref(`Events/ID/${eventName}`);
+        const eventRef = db.ref(`Events/ID/${id}`);
 
         // Write the event data
         await eventRef.set({
+            ID : id,
             Date: date,
             GroupID: groupID,
             Location: location,
@@ -138,15 +141,15 @@ app.get('/FetchEvents', async (req, res) => {
     }
 });
 
-app.delete('/DeleteEvents/:eventName', async (req, res) => {
-    const { eventName } = req.params;
+app.delete('/DeleteEvents/:id', async (req, res) => {
+    const { id } = req.params;
   
-    if (!eventName) {
+    if (!id) {
       return res.status(400).json({ error: 'Event name is required' });
     }
   
     try {
-      const eventRef = db.ref(`Events/ID/${eventName}`);
+      const eventRef = db.ref(`Events/ID/${id}`);
       
       const snapshot = await eventRef.once('value');
       if (!snapshot.exists()) {
@@ -162,16 +165,16 @@ app.delete('/DeleteEvents/:eventName', async (req, res) => {
     }
   });
   
-  app.put('/EditEvents/:eventName', async (req, res) => {
-    const { eventName } = req.params;
-    const { date, groupID, location, time, category, notes } = req.body;
+  app.put('/EditEvents/:id', async (req, res) => {
+    const { id } = req.params;
+    const { date, groupID, location, time, category, notes, eventName} = req.body;
   
-    if (!eventName) {
+    if (!id) {
       return res.status(400).json({ error: 'Event name is required in URL' });
     }
   
     try {
-      const eventRef = db.ref(`Events/ID/${eventName}`);
+      const eventRef = db.ref(`Events/ID/${id}`);
       const snapshot = await eventRef.once('value');
   
       if (!snapshot.exists()) {
@@ -180,6 +183,7 @@ app.delete('/DeleteEvents/:eventName', async (req, res) => {
   
       // Update fields
       await eventRef.update({
+        eventName : eventName, 
         Date: date,
         GroupID: groupID,
         Location: location,
