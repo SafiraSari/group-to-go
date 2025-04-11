@@ -16,10 +16,15 @@ const Schedule = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [eventTitle, setEventTitle] = useState("");
   const [userID, setUserID] = useState("");
+  const [selectedWeek, setSelectedWeek] = useState("");
+  const [weekDateRange, setWeekDateRange] = useState("");
   
   // Days and time slots for the grid
-  const days = ["Sun","Mon", "Tue", "Wed", "Thu", "Fri","Sat",];
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const timeSlots = Array.from({ length: 12 }, (_, i) => i + 9); // 9AM to 8PM
+  
+  // State to hold the dates for the current week
+  const [weekDates, setWeekDates] = useState([]);
   
   // Initialize availability grid for all users
   const [availability, setAvailability] = useState({});
@@ -37,7 +42,81 @@ const Schedule = () => {
       });
     });
     setAvailability(initialAvailability);
+    
+    // Set default week to current week
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const currentWeek = `${year}-W${getWeekNumber(today)}`;
+    setSelectedWeek(currentWeek);
+    updateWeekDates(currentWeek);
   }, []);
+  
+  // Calculate the week number for a given date
+  const getWeekNumber = (date) => {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+    const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  };
+  
+  // Update the week dates based on the selected week
+  const updateWeekDates = (weekString) => {
+    if (!weekString) return;
+    
+    // Parse the week string (format: YYYY-WXX)
+    const year = parseInt(weekString.substring(0, 4));
+    const weekNum = parseInt(weekString.substring(6));
+    
+    // Calculate the first day of the year
+    const firstDayOfYear = new Date(year, 0, 1);
+    
+    // Calculate days to add to get to the first day of the selected week
+    // Week 1 is the week with the first Thursday of the year (ISO 8601)
+    const dayOffset = (weekNum - 1) * 7;
+    
+    // Find the first day of the selected week (should be a Monday per ISO 8601)
+    const firstDayOfWeek = new Date(firstDayOfYear);
+    firstDayOfWeek.setDate(firstDayOfYear.getDate() + dayOffset - firstDayOfYear.getDay() + 1);
+    
+    // If firstDayOfYear is a Sunday, we need to adjust
+    if (firstDayOfYear.getDay() === 0) {
+      firstDayOfWeek.setDate(firstDayOfWeek.getDate() - 7);
+    }
+    
+    // Create an array of dates for the week starting from Sunday
+    const dates = [];
+    const sundayOfWeek = new Date(firstDayOfWeek);
+    sundayOfWeek.setDate(sundayOfWeek.getDate() - 1); // Go back to Sunday
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(sundayOfWeek);
+      date.setDate(sundayOfWeek.getDate() + i);
+      dates.push(date);
+    }
+    
+    setWeekDates(dates);
+    
+    // Create a formatted date range string for the title
+    if (dates.length > 0) {
+      const firstDate = dates[0];
+      const lastDate = dates[6];
+      
+      const formatDate = (date) => {
+        const options = { month: 'short', day: 'numeric', year: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
+      };
+      
+      setWeekDateRange(`${formatDate(firstDate)} - ${formatDate(lastDate)}`);
+    }
+  };
+  
+  // Handle week selection change
+  const handleWeekChange = (e) => {
+    const week = e.target.value;
+    setSelectedWeek(week);
+    updateWeekDates(week);
+  };
   
   // Format time for compact display
   const formatTime = (hour) => {
@@ -133,10 +212,11 @@ const Schedule = () => {
   return (
     <>
       <NavBar />
-      <div className="schedule-container">
-        <div className="header-title">
+      <div className="header-title">
           <h1>SCHEDULE</h1>
-        </div>
+      </div>
+      <div className="schedule-container">
+        
         <Button label="+ Create New Schedule" onClick={() => setModalOpen(true)} />
         
         {/* User selection buttons */}
@@ -152,7 +232,6 @@ const Schedule = () => {
               />
             ))}
           </div>
-          
         </div>
         
         {/* Instructions */}
@@ -160,14 +239,28 @@ const Schedule = () => {
           <p>Click on time slots to mark your availability</p>
         </div>
         
+        {/* Week title */}
+        {weekDateRange && (
+          <div className="week-title">
+            <h2>{weekDateRange}</h2>
+          </div>
+        )}
+        
         {/* Schedule grid */}
         <div className="schedule-grid">
           <table>
             <thead>
               <tr>
                 <th className="time-header"></th>
-                {days.map(day => (
-                  <th key={day}>{day}</th>
+                {days.map((day, index) => (
+                  <th key={day}>
+                    {day}
+                    {weekDates.length > 0 && (
+                      <div className="date-number">
+                        {weekDates[index]?.getDate()}
+                      </div>
+                    )}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -222,35 +315,42 @@ const Schedule = () => {
             onCancel={handleModalCancel} 
             onClose={handleModalCancel}
           >
-            <h1>CREATE NEW SCHEDULE</h1>
-            <Input 
-              label="UserId" 
-              placeholder="Enter user ID" 
-              value={userID}
-              onChange={(e) => setEventTitle(e.target.value)}
-              isRequired 
-            />
+            <div className="modal-form">
+              <h1>CREATE NEW SCHEDULE</h1>
+              <Input 
+                label="UserId" 
+                placeholder="Enter user ID" 
+                value={userID}
+                onChange={(e) => setUserID(e.target.value)}
+                isRequired 
+              />
 
-            <Input 
-              label="Event Title" 
-              placeholder="Enter event title" 
-              value={eventTitle}
-              onChange={(e) => setEventTitle(e.target.value)}
-              isRequired 
-            />
-            
-            <h3>Dates</h3>
-            <div className="date-range">
-              <Input label="Start Date" type="week" />
+              <Input 
+                label="Event Title" 
+                placeholder="Enter event title" 
+                value={eventTitle}
+                onChange={(e) => setEventTitle(e.target.value)}
+                isRequired 
+              />
+              
+              <h3>Dates</h3>
+              <div className="date-range">
+                <Input 
+                  label="Start Date" 
+                  type="week" 
+                  value={selectedWeek}
+                  onChange={handleWeekChange}
+                />
+              </div>
+              
+              <h3>Time Range</h3>
+              <div className="time-range">
+                <Input label="Start Time" type="time" defaultValue="09:00" />
+                <Input label="End Time" type="time" defaultValue="17:00" />
+              </div>
+              
+              <Input label="Notes" type="text" placeholder="Enter any additional details..." />
             </div>
-            
-            <h3>Time Range</h3>
-            <div className="time-range">
-              <Input label="Start Time" type="time" defaultValue="09:00" />
-              <Input label="End Time" type="time" defaultValue="17:00" />
-            </div>
-            
-            <Input label="Notes" type="text" placeholder="Enter any additional details..." />
           </Modal>
         )}
       </div>
