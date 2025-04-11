@@ -3,6 +3,7 @@ import NavBar from "../components/NavBar";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Modal from "../components/Modal";
+import Confirmation from "../components/Confirmation"; // ⬅️ keep as-is
 import './Groups.css';
 
 const Groups = () => {
@@ -15,6 +16,20 @@ const Groups = () => {
   const [groups, setGroups] = useState([]);
   const [expandedGroupIndex, setExpandedGroupIndex] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // ✅ Confirmation modal state
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [confirmationLabel, setConfirmationLabel] = useState('');
+  const [onConfirmCallback, setOnConfirmCallback] = useState(() => () => {});
+
+  const triggerConfirmation = (label, onConfirm) => {
+    setConfirmationLabel(label);
+    setOnConfirmCallback(() => () => {
+      onConfirm();
+      setShowConfirmation(false);
+    });
+    setShowConfirmation(true);
+  };
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -123,6 +138,26 @@ const Groups = () => {
     }
   };
 
+  const leaveGroup = async (group) => {
+    try {
+      const res = await fetch(`http://localhost:3500/groups/${group.id}/leave`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setGroups((prev) => prev.filter(g => g.id !== group.id));
+        setErrorMessage('');
+      } else {
+        setErrorMessage(data.error || 'Failed to leave group.');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('Error leaving group.');
+    }
+  };
+
   const kickMember = async (group, member) => {
     try {
       const res = await fetch(`http://localhost:3500/groups/${group.id}/kick`, {
@@ -146,26 +181,6 @@ const Groups = () => {
     } catch (err) {
       console.error(err);
       setErrorMessage('Error kicking member.');
-    }
-  };
-
-  const leaveGroup = async (group) => {
-    try {
-      const res = await fetch(`http://localhost:3500/groups/${group.id}/leave`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setGroups((prev) => prev.filter(g => g.id !== group.id));
-        setErrorMessage('');
-      } else {
-        setErrorMessage(data.error || 'Failed to leave group.');
-      }
-    } catch (err) {
-      console.error(err);
-      setErrorMessage('Error leaving group.');
     }
   };
 
@@ -259,25 +274,19 @@ const Groups = () => {
                     <div style={{ marginTop: '1rem' }}>
                       {username === group.createdBy ? (
                         <Button
-                        
                           label="Disband Group"
-                          variant = "red"
-                          
-                          onClick={() => {
-                            const confirmDelete = window.confirm(`Are you sure you want to disband "${group.name}"?`);
-                            if (confirmDelete) disbandGroup(group);
-                          }}
+                          variant="red"
+                          onClick={() =>
+                            triggerConfirmation(`disband "${group.name}"`, () => disbandGroup(group))
+                          }
                         />
                       ) : (
                         <Button
-
-                          variant = "red"
                           label="Leave Group"
-                          type="red"
-                          onClick={() => {
-                            const confirmLeave = window.confirm(`Are you sure you want to leave "${group.name}"?`);
-                            if (confirmLeave) leaveGroup(group);
-                          }}
+                          variant="red"
+                          onClick={() =>
+                            triggerConfirmation(`leave "${group.name}"`, () => leaveGroup(group))
+                          }
                         />
                       )}
                     </div>
@@ -287,6 +296,15 @@ const Groups = () => {
             ))
           )}
         </div>
+
+       
+        {showConfirmation && (
+          <Confirmation
+            label={confirmationLabel}
+            onConfirm={onConfirmCallback}
+            onCancel={() => setShowConfirmation(false)}
+          />
+        )}
       </div>
     </>
   );
