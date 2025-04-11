@@ -347,6 +347,7 @@ const getCountdown = (dateStr, timeStr) => {
         </ul>
 
       {selectedEvent && (
+        <div className="events-modalchanges">
         <Modal hideButton onClose={() => { setSelectedEvent(null); setIsEditing(false); }}>
           
           {isEditing ? (
@@ -414,6 +415,7 @@ const getCountdown = (dateStr, timeStr) => {
             </>
           ) : (
             <>
+            
               <h2>{selectedEvent.eventName}</h2>
               <p><strong>Category:</strong> {selectedEvent.Category}</p>
               <p><strong>Group Code:</strong> {selectedEvent.GroupID}</p>
@@ -438,6 +440,7 @@ const getCountdown = (dateStr, timeStr) => {
             </>
           )}
         </Modal>
+        </div>
 )}
       </div>
     </>

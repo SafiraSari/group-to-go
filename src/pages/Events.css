@@ -127,3 +127,40 @@
     align-items: center;
   }
 }
+
+.events-modalchanges .modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 650px;
+  width: 90%;
+  padding: 2.5rem;
+  background-color: #fffdf7;
+  border-radius: 18px;
+  border: 2px solid var(--SANDY);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1000; /* ensure it's on top */
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.events-modalchanges .modal h2 {
+  color: var(--CARAMEL);
+  font-size: 2.4rem;
+  text-align: center;
+}
+
+.events-modalchanges .modal .option-button {
+  margin-top: auto;
+  padding-top: 2rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.events-modalchanges .modal p {
+  font-size: 1.2rem;
+  text-align: center;
+}
+
