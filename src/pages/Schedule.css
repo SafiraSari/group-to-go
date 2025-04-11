@@ -1,0 +1,152 @@
+
+.schedule-container {
+  width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  min-height: 100vh;
+}
+
+  .header-title {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .header-title h1 {
+    font-weight: bold;
+  }
+  
+  .user-selection {
+    margin: 30px 0;
+  }
+  
+  .schedule-instructions {
+    margin: 15px 0;
+    font-style: italic;
+    text-align: center;
+    color: #666;
+  }
+  
+  .schedule-grid {
+    overflow-x: auto;
+    margin: 20px 0;
+  }
+  
+  .schedule-grid table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border-spacing: 0;
+  }
+  
+  .schedule-grid td {
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 0;
+    height: 80px;
+    width: 60px;
+  }
+  
+  .schedule-grid th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    padding: 8px;
+  }
+  
+  .time-header {
+    width: 40px;
+  }
+  
+  .time-label {
+    font-weight: bold;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    padding: 8px 4px !important;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+  }
+  
+  .schedule-cell:hover {
+    opacity: 0.8;
+  }
+  
+  .no-availability {
+    background-color: #f4f4f4;
+  }
+  
+  .partial-availability {
+    background-color: #ffcc80;
+  }
+  
+  .full-availability {
+    background-color: #81c784;
+  }
+  
+  .user-selected {
+    border: 2px solid #2196f3;
+    box-sizing: border-box;
+  }
+  
+  
+  .schedule-legend {
+    margin: 20px 0;
+  }
+  
+  .legend-items {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+  }
+  
+  .date-range, .time-range {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .error {
+    color: var(--red);
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+
+  .date-number {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 4px;
+  }
+  
+  .schedule-grid th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    padding: 8px;
+    min-width: 70px; /* Ensure column width accommodates both day and date */
+  }
+  
+  .week-title {
+    margin: 20px 0;
+    text-align: center;
+  }
+  
+  .week-title h2 {
+    font-size: 1.3rem;
+    color: #333;
+    font-weight: 500;
+  }
