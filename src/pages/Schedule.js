@@ -2,26 +2,18 @@ import React, { useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import Button from "../components/Button";
 import Input from "../components/Input";
-import Modal from "../components/Modal";
 import "./Schedule.css";
 
 const Schedule = () => {
-  // State for managing availability
   const [availability, setAvailability] = useState({});
   const [modalOpen, setModalOpen] = useState(false);
-  const [eventTitle, setEventTitle] = useState("");
   const [selectedWeek, setSelectedWeek] = useState("");
   const [weekDateRange, setWeekDateRange] = useState("");
-  
-  // Days and time slots for the grid
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const timeSlots = Array.from({ length: 12 }, (_, i) => i + 9); // 9AM to 8PM
-  
-  // State to hold the dates for the current week
+  const timeSlots = Array.from({ length: 12 }, (_, i) => i + 9);
   const [weekDates, setWeekDates] = useState([]);
-  
+
   useEffect(() => {
-    // Initialize empty availability
     const initialAvailability = {};
     days.forEach(day => {
       initialAvailability[day] = {};
@@ -31,22 +23,19 @@ const Schedule = () => {
     });
     setAvailability(initialAvailability);
     
-    // Set default week to current week
     const today = new Date();
     const year = today.getFullYear();
     const currentWeek = `${year}-W${getWeekNumber(today)}`;
     setSelectedWeek(currentWeek);
     updateWeekDates(currentWeek);
   }, []);
-  
-  // Calculate the week number for a given date
+
   const getWeekNumber = (date) => {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
     const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
   };
-  
-  // Update the week dates based on the selected week
+
   const updateWeekDates = (weekString) => {
     if (!weekString) return;
     
@@ -85,18 +74,27 @@ const Schedule = () => {
       setWeekDateRange(`${formatDate(firstDate)} - ${formatDate(lastDate)}`);
     }
   };
-  
+
   const handleWeekChange = (e) => {
     const week = e.target.value;
     setSelectedWeek(week);
     updateWeekDates(week);
+    
+    // Clear all availability for the new week
+    const clearedAvailability = {};
+    days.forEach(day => {
+      clearedAvailability[day] = {};
+      timeSlots.forEach(time => {
+        clearedAvailability[day][time] = false;
+      });
+    });
+    setAvailability(clearedAvailability);
   };
-  
   const formatTime = (hour) => {
     if (hour === 12) return "12pm";
     return hour < 12 ? `${hour}am` : `${hour-12}pm`;
   };
-  
+
   const toggleAvailability = (day, time) => {
     setAvailability(prev => ({
       ...prev,
@@ -106,7 +104,7 @@ const Schedule = () => {
       }
     }));
   };
-  
+
   const getCellStyle = (day, time) => {
     const isAvailable = availability[day]?.[time];
     
@@ -118,20 +116,12 @@ const Schedule = () => {
       cursor: "pointer"
     };
   };
-  
-  const handleModalSubmit = () => {
-    setModalOpen(false);
-  };
-  
-  const handleModalCancel = () => {
-    setModalOpen(false);
-  };
 
   return (
     <>
       <NavBar />
       <div className="header-title">
-          <h1>SCHEDULE</h1>
+        <h1>SCHEDULE</h1>
       </div>
       <div className="schedule-container">
         <Button label="+ Create New Schedule" onClick={() => setModalOpen(true)} />
@@ -199,40 +189,45 @@ const Schedule = () => {
         </div>
         
         {modalOpen && (
-          <Modal 
-            onSubmit={handleModalSubmit} 
-            onCancel={handleModalCancel} 
-            onClose={handleModalCancel}
+          <div 
+            className="schedule-modal-overlay"
+            onClick={() => setModalOpen(false)}
           >
-            <div className="modal-form">
-              <h1>CREATE NEW SCHEDULE</h1>
-              <Input 
-                label="Event Title" 
-                placeholder="Enter event title" 
-                value={eventTitle}
-                onChange={(e) => setEventTitle(e.target.value)}
-                isRequired 
-              />
-              
-              <h3>Dates</h3>
-              <div className="date-range">
-                <Input 
-                  label="Start Date" 
-                  type="week" 
-                  value={selectedWeek}
-                  onChange={handleWeekChange}
+            <div 
+              className="schedule-modal-content"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="modal-form">
+                <h1 className="schedule-title">CREATE NEW SCHEDULE</h1>
+                <h3>Dates</h3>
+                <div className="date-range">
+                  <Input 
+                    label="Start Date" 
+                    type="week" 
+                    value={selectedWeek}
+                    onChange={handleWeekChange}
+                    style={{ 
+                      maxWidth: '800px'
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="schedule-modal-actions">
+                <Button 
+                  label="Cancel" 
+                  variant="red"
+                  className="schedule-modal-cancel" 
+                  onClick={() => setModalOpen(false)}
+                />
+                <Button 
+                  label="Confirm"
+                  variant="green" 
+                  className="schedule-modal-cancel" 
+                  onClick={() => setModalOpen(false)}
                 />
               </div>
-              
-              <h3>Time Range</h3>
-              <div className="time-range">
-                <Input label="Start Time" type="time" defaultValue="09:00" />
-                <Input label="End Time" type="time" defaultValue="17:00" />
-              </div>
-              
-              <Input label="Notes" type="text" placeholder="Enter any additional details..." />
             </div>
-          </Modal>
+          </div>
         )}
       </div>
     </>
