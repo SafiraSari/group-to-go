@@ -54,7 +54,7 @@ const Polls = () => {
       <NavBar />
       <div className="polls-container">
 
-        <div className="header-title">
+        <div className="polls-header-title">
           <h1>POLLS</h1>
         </div>
 

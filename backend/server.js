@@ -361,6 +361,56 @@ app.post('/expenses', async (req, res) => {
     }
   });
 
+// Leave a group
+app.post('/groups/:groupId/leave', async (req, res) => {
+    const { groupId } = req.params;
+    const { username } = req.body;
+
+    if (!username) return res.status(400).json({ error: 'Username required' });
+
+    try {
+        const groupRef = db.ref(`groups/${groupId}`);
+        const snapshot = await groupRef.once('value');
+        if (!snapshot.exists()) return res.status(404).json({ error: 'Group not found' });
+
+        const group = snapshot.val();
+        const updatedMembers = group.members.filter(member => member !== username);
+
+        await groupRef.update({ members: updatedMembers });
+        res.status(200).json({ message: 'Left the group successfully' });
+    } catch (err) {
+        console.error('Leave group error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+// Kick a user from a group
+app.post('/groups/:groupId/kick', async (req, res) => {
+    const { groupId } = req.params;
+    const { targetUsername } = req.body;
+  
+    if (!targetUsername) return res.status(400).json({ error: 'Target username required' });
+  
+    try {
+      const groupRef = db.ref(`groups/${groupId}`);
+      const snapshot = await groupRef.once('value');
+      if (!snapshot.exists()) return res.status(404).json({ error: 'Group not found' });
+  
+      const group = snapshot.val();
+  
+      // Don't allow creator to be kicked
+      if (targetUsername === group.createdBy) {
+        return res.status(403).json({ error: 'Cannot kick the group creator' });
+      }
+  
+      const updatedMembers = group.members.filter((m) => m !== targetUsername);
+      await groupRef.update({ members: updatedMembers });
+  
+      res.status(200).json({ message: `Kicked ${targetUsername} from the group` });
+    } catch (err) {
+      console.error('Kick user error:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

@@ -1,0 +1,55 @@
+@import url("../constants.css");
+
+.map-container {
+  width: 100%;
+  text-align: center;
+  align-items: center;
+}
+/* .map-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+} */
+.location-button {
+    background-color: var(--CARAMEL);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .location-button:hover {
+    background-color: var(--CARAMEL-DARK);
+    transform: scale(1.05);
+  }
+  
+  .map-search {
+    width: 40%;
+    margin: 20px 0;
+    position: relative;
+    z-index: 1000; /* Ensure dropdown appears above map */
+  }
+  .favorite-btn{
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    left:200px;
+    display: flex;
+  }
+  .custom-infowindow p{
+    font-size: 1rem;
+    margin: 0;
+    padding: 0;
+    color:var(--CARAMEL);
+  }

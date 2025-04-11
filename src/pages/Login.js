@@ -42,7 +42,7 @@ const LoginPage = () => {
                 
                 localStorage.setItem('username', resData.username);
                 console.log('Login successful as:', resData.username);
-                navigate('/');
+                navigate('/groups');
             }
         } catch (error) {
             SetError('Error connecting to server');
