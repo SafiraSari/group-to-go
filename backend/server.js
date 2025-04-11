@@ -60,6 +60,7 @@ app.post('/login', async(req, res) => {
             return res.status(401).json({ error: 'Incorrect password' });
         }
 
+
         return res.status(200).json({ message: 'Login successful!', username });
     } catch (err) {
         console.error('Login error:', err);
@@ -91,11 +92,71 @@ app.post('/groups', async (req, res) => {
         return res.status(200).json({ message: 'Group created successfully!', groupId: newGroupRef.key });
     } catch (err) {
         console.error('Group creation error:', err);
+
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
 app.post('/groups/join', async (req, res) => {
     const { code, username } = req.body;
+
+app.delete('/DeleteEvents/:id', async (req, res) => {
+    const { id } = req.params;
+  
+    if (!id) {
+      return res.status(400).json({ error: 'Event name is required' });
+    }
+  
+    try {
+      const eventRef = db.ref(`Events/ID/${id}`);
+      
+      const snapshot = await eventRef.once('value');
+      if (!snapshot.exists()) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+  
+      await eventRef.remove();
+  
+      return res.status(200).json({ message: 'Event deleted successfully' });
+    } catch (err) {
+      console.error('Error deleting event:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+  app.put('/EditEvents/:id', async (req, res) => {
+    const { id } = req.params;
+    const { date, groupID, location, time, category, notes, eventName} = req.body;
+  
+    if (!id) {
+      return res.status(400).json({ error: 'Event name is required in URL' });
+    }
+  
+    try {
+      const eventRef = db.ref(`Events/ID/${id}`);
+      const snapshot = await eventRef.once('value');
+  
+      if (!snapshot.exists()) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+  
+      // Update fields
+      await eventRef.update({
+        eventName : eventName, 
+        Date: date,
+        GroupID: groupID,
+        Location: location,
+        Time: time,
+        Notes: notes,
+        Category: category,
+      });
+  
+      return res.status(200).json({ message: 'Event updated successfully' });
+    } catch (err) {
+      console.error('Error updating event:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
 
     if (!code || !username) {
         return res.status(400).json({ error: 'Group code and username are required' });
@@ -223,6 +284,7 @@ app.post('/groups/:groupId/kick', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
