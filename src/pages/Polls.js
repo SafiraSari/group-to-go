@@ -315,7 +315,7 @@ const Polls = () => {
         ) : polls.length > 0 ? (
           <Accordion items={polls} />
         ) : (
-          <p>No polls found. Create a new poll!</p>
+          <p className="no-polls-message">No polls found. Create a new poll!</p>
         )}
 
         {modalOpen && (

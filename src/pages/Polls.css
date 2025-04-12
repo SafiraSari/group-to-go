@@ -216,3 +216,10 @@
 .polls-container select option:disabled {
   color: #999; 
 }
+
+.no-polls-message {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1.1rem;
+  color: #555;
+}
