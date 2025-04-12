@@ -61,12 +61,14 @@ app.post('/login', async(req, res) => {
             return res.status(401).json({ error: 'Incorrect password' });
         }
 
+
         return res.status(200).json({ message: 'Login successful!', username });
     } catch (err) {
         console.error('Login error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 // Create group route
 app.post('/groups', async (req, res) => {
     const { name, description, code, createdBy } = req.body;
@@ -92,12 +94,15 @@ app.post('/groups', async (req, res) => {
         return res.status(200).json({ message: 'Group created successfully!', groupId: newGroupRef.key });
     } catch (err) {
         console.error('Group creation error:', err);
+
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
 app.post('/groups/join', async (req, res) => {
     const { code, username } = req.body;
-
+  
     if (!code || !username) {
         return res.status(400).json({ error: 'Group code and username are required' });
     }
@@ -224,7 +229,6 @@ app.post('/groups/:groupId/kick', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-
 
 //for Expenses tab
 // Create expense
@@ -585,3 +589,161 @@ app.post('/polls/:pollId/vote', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+
+app.get('/FetchEvents', async (req, res) => {
+    try {
+        // Reference to the entire Events node
+        const eventsRef = db.ref('Events/ID');
+        // Get the events data from Firebase
+        const snapshot = await eventsRef.once('value');
+        
+        // Check if any events exist
+        if (!snapshot.exists()) {
+            return res.status(404).json({ error: 'No events found' });
+        }
+        // Get the events data as an object
+        const eventsData = snapshot.val();
+        // Return the events in an array format
+        const events = Object.keys(eventsData).map(id => ({
+            id,
+            ...eventsData[id]
+        }));
+        // Send the event data in the response
+        return res.status(200).json({
+            message: 'Events retrieved successfully',
+            data: events
+        });
+    } catch (err) {
+        console.error('Error retrieving events:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.delete('/DeleteEvents/:id', async (req, res) => {
+    const { id } = req.params;
+  
+    if (!id) {
+      return res.status(400).json({ error: 'Event name is required' });
+    }
+  
+    try {
+      const eventRef = db.ref(`Events/ID/${id}`);
+      
+      const snapshot = await eventRef.once('value');
+      if (!snapshot.exists()) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+  
+      await eventRef.remove();
+  
+      return res.status(200).json({ message: 'Event deleted successfully' });
+    } catch (err) {
+      console.error('Error deleting event:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.put('/EditEvents/:id', async (req, res) => {
+    const { id } = req.params;
+    const { date, groupID, location, time, category, notes, eventName} = req.body;
+  
+    if (!id) {
+      return res.status(400).json({ error: 'Event name is required in URL' });
+    }
+  
+    try {
+      const eventRef = db.ref(`Events/ID/${id}`);
+      const snapshot = await eventRef.once('value');
+  
+      if (!snapshot.exists()) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+  
+      // Update fields
+      await eventRef.update({
+        eventName : eventName, 
+        Date: date,
+        GroupID: groupID,
+        Location: location,
+        Time: time,
+        Notes: notes,
+        Category: category,
+      });
+  
+      return res.status(200).json({ message: 'Event updated successfully' });
+    } catch (err) {
+      console.error('Error updating event:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.post('/CreateEvents', async (req, res) => {
+    const { date, groupID, location, eventName,time, category, notes, id} = req.body;
+
+    console.log("id " + id);
+
+    if (!date || !groupID || !location || !eventName|| !time || !category || !id) {
+        return res.status(400).json({ error: 'All fields (id, date, groupID, location, eventName, time) are required' });
+    }
+
+    try {
+
+        const eventRef = db.ref(`Events/ID/${id}`);
+
+        // Write the event data
+        await eventRef.set({
+            ID : id,
+            Date: date,
+            GroupID: groupID,
+            Location: location,
+            eventName: eventName,
+            Category: category,
+            Notes: notes,
+            Time: time
+        });
+
+        // Send response after writing to the database
+        return res.status(201).json({
+            message: 'Event created successfully',
+            data: {
+                date,
+                groupID,
+                location,
+                eventName,
+            }
+        });
+    } catch (err) {
+        console.error('Error writing event:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+    });
+
+    app.get('/FetchEvents', async (req, res) => {
+        try {
+            // Reference to the entire Events node
+            const eventsRef = db.ref('Events/ID');
+            // Get the events data from Firebase
+            const snapshot = await eventsRef.once('value');
+
+            // Check if any events exist
+            if (!snapshot.exists()) {
+                return res.status(404).json({ error: 'No events found' });
+            }
+
+            // Get the events data as an object
+            const eventsData = snapshot.val();
+            // Return the events in an array format
+            const events = Object.keys(eventsData).map(id => ({id,...eventsData[id]
+        }));
+
+        // Send the event data in the response
+        return res.status(200).json({
+            message: 'Events retrieved successfully',
+            data: events
+        });
+
+    } catch (err) {
+        console.error('Error retrieving events:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+    });

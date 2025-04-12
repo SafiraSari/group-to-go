@@ -3,7 +3,9 @@ import Button from "../components/Button";
 import Confirmation from "../components/Confirmation";
 import './Modal.css';
 
-const Modal = ({ onSubmit, onCancel, onClose, children }) => {
+
+const Modal = ({ onSubmit, onCancel, onClose, children, hideButton = false }) => {
+
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleSubmitClick = () => {
@@ -18,6 +20,7 @@ const Modal = ({ onSubmit, onCancel, onClose, children }) => {
   const handleCancel = () => {
     setShowConfirmation(false);
   };
+
 
   return (
     <div 
@@ -36,11 +39,14 @@ const Modal = ({ onSubmit, onCancel, onClose, children }) => {
         <div className='modal-content'>
           {children}
         </div>
-
+      {!hideButton &&(
         <div className='modal-footer'>
           <Button label="Cancel" variant="red" onClick={onCancel} />
           <Button label="Confirm" variant="green" onClick={handleSubmitClick} />
         </div>
+
+      )}
+
 
         {showConfirmation && (
           <Confirmation
@@ -49,6 +55,7 @@ const Modal = ({ onSubmit, onCancel, onClose, children }) => {
             onCancel={handleCancel}
           />
         )}
+
       </div>
     </div>
   );

@@ -14,8 +14,10 @@ const NavBar = () => {
   const currentPath = location.pathname;
 
   const navTabs = [
+
     { path: "/groups", label: "Groups", icon: groups },
     { path: "/map", label: "Map", icon: map },
+
     { path: "/events", label: "Events", icon: events },
     { path: "/schedule", label: "Schedule", icon: schedule },
     { path: "/expenses", label: "Expenses", icon: expenses },
@@ -25,7 +27,9 @@ const NavBar = () => {
 
   return (
     <div className="nav-bar">
+
       <Link to="/groups">
+
         <img src={logo} alt="Logo" className="logo" />
       </Link>
       <div className="nav-container">

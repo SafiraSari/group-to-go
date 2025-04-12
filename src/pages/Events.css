@@ -1,0 +1,166 @@
+/* Events Container */
+.events-container {
+  width: 100%;
+  text-align: center;
+  padding-top: 1rem;
+}
+
+/* 💡 Section Header with Divider */
+.header-title {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 2rem;
+}
+
+.header-title::before,
+.header-title::after {
+  content: "";
+  display: block;
+  border-bottom: 2px solid var(--SANDY);
+  height: 1px;
+}
+
+.header-title h1 {
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 30px;
+  letter-spacing: 1px;
+  color: var(--CARAMEL);
+  margin: 0;
+}
+
+/* Event Card Styling */
+.event-card {
+  background-color: #fef9f0;
+  border: 1px solid var(--GRAY_LIGHT);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: 0.3s ease;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.event-card:hover {
+  transform: scale(1.01);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.event-card h3 {
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0;
+  padding: 0;
+}
+
+/* Event Details Section (Hidden by Default) */
+.event-details {
+  display: none;
+}
+
+/* Event List Items */
+.event-list-items {
+  padding: 0;
+  list-style-type: none;
+  margin: 20px auto;
+  width: 90%;
+  max-width: 800px;
+}
+
+/* Option Buttons (e.g., RSVP, Join) */
+.option-button {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+/* Countdown */
+.countdown {
+  font-size: 20px;
+  text-align: center;
+  color: var(--CARAMEL);
+}
+
+/* Error Message */
+.error {
+  color: var(--RED);
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+/* Modal Styles */
+.modal h2 {
+  font-size: 2.2rem !important;
+  margin-bottom: 1.5rem;
+  color: var(--CARAMEL);
+}
+
+.modal p {
+  font-size: 1.3rem !important;
+  line-height: 1.6;
+  margin: 0.8rem 0;
+}
+
+.modal p strong {
+  font-size: 1.4rem !important;
+  font-weight: 600;
+}
+
+.modal .option-button {
+  margin-top: auto;
+  padding-top: 2rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Responsive Layout */
+@media (max-width: 600px) {
+  .option-button {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.events-modalchanges .modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 650px;
+  width: 90%;
+  padding: 2.5rem;
+  background-color: #fffdf7;
+  border-radius: 18px;
+  border: 2px solid var(--SANDY);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1000; /* ensure it's on top */
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.events-modalchanges .modal h2 {
+  color: var(--CARAMEL);
+  font-size: 2.4rem;
+  text-align: center;
+}
+
+.events-modalchanges .modal .option-button {
+  margin-top: auto;
+  padding-top: 2rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.events-modalchanges .modal p {
+  font-size: 1.2rem;
+  text-align: center;
+}
+
