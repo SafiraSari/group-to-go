@@ -1,50 +1,225 @@
-/* Polls Modal */
-.polls-container {
+/* Poll Card Styling */
+.poll-content {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  margin: 1rem auto;
+  max-width: 800px;
+  text-align: left;
+}
+
+/* Title line spacing */
+.poll-content p {
+  margin: 0.5rem 0;
+  line-height: 1.4;
+}
+.create-poll-button-wrapper {
   width: 100%;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+}
+/* Category image row */
+.poll-content-category {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 1rem 0;
+  justify-content: flex-start;
 }
 
-.polls-container h3 {
-  display: block;
-  color: var(--CARAMEL);
-  font-size: 1.1rem;
+.poll-content-category img {
+  width: 40px;
+  height: 40px;
+}
+
+/* Voting Options */
+.poll-content-options {
+  display: flex;
+  gap: 10px;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+/* Results */
+.poll-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.poll-result-item {
+  background-color: #f7f7f7;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+}
+
+.poll-result-option {
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.poll-result-bar-container {
+  position: relative;
+  background-color: #e5e5e5;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 24px;
+}
+
+.poll-result-bar {
+  background-color: var(--CARAMEL);
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.poll-result-percentage {
+  position: absolute;
+  right: 12px;
+  top: 3px;
+  font-size: 0.9rem;
   font-weight: 500;
+  color: #444;
 }
 
+/* Submit Button spacing */
+.poll-content button {
+  margin-top: 1rem;
+}
+
+/* Status Tag */
+.accordion-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.accordion-content {
+  transition: all 0.3s ease;
+}
+/* Additional spacing */
+.poll-vote-count {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.8rem;
+}
+/* Modal Form Styling */
+.modal-content {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Headings and Inputs */
+.modal-content h1 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: var(--CARAMEL);
+  margin-bottom: 1rem;
+}
+
+.input-wrapper,
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Category Buttons Layout */
 .option-button {
   display: flex;
-  justify-content: space-evenly;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
 }
 
-.error {
-  color: var(--RED);
-}
-
+/* Category Image */
 .selected-category {
-  margin-top: 15px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  
+  margin: 1rem 0;
 }
 
 .category-image {
-  width: 30%;
+  width: 180px;
+  max-width: 80%;
   height: auto;
-  margin-top: 10px;
 }
 
-.polls-header-title h1 {
-  text-align:center;
-  text-transform:uppercase;
-  font-size: 30px; letter-spacing:1px;
-  color: var(--CARAMEL);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  grid-template-rows: 16px 0;
-  grid-gap: 22px;
+/* Option Fields */
+.modal-content .option-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
- 
-.polls-header-title h1:after, .polls-header-title h1:before {
-  content: " ";
+
+/* Remove/Add Buttons */
+.option-button-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Final Action Buttons (Cancel/Create) */
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.modal-actions button {
+  min-width: 140px;
+}
+.poll-content.completed {
+  opacity: 0.85;
+  border: 1px solid var(--SILVER);
+  transition: all 0.3s ease;
+}
+
+.accordion-completed {
+  background-color: var(--SILVER);
+  color: #fff; /* Or your preferred color */
+  border-radius: 6px;
+}
+.polls-container select {
+  width: 105.5%;
+  height: 3.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: #fdfaf5;
+  color: #333;
+  outline: none;
+  transition: border 0.3s ease;
+}
+
+.polls-container select:focus {
+  border-color: var(--CARAMEL);
+}
+.modal-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--CARAMEL); /* same as Poll Question */
+  margin-bottom: 0.3rem;
   display: block;
-  border-bottom: 2px solid var(--SANDY);
+}
+.polls-container select option:disabled {
+  color: #999; 
+}
+
+.no-polls-message {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1.1rem;
+  color: #555;
 }

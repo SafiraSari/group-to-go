@@ -1,3 +1,4 @@
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -385,32 +386,201 @@ app.post('/groups/:groupId/leave', async (req, res) => {
 });
 // Kick a user from a group
 app.post('/groups/:groupId/kick', async (req, res) => {
-    const { groupId } = req.params;
-    const { targetUsername } = req.body;
-  
-    if (!targetUsername) return res.status(400).json({ error: 'Target username required' });
-  
-    try {
-      const groupRef = db.ref(`groups/${groupId}`);
-      const snapshot = await groupRef.once('value');
-      if (!snapshot.exists()) return res.status(404).json({ error: 'Group not found' });
-  
-      const group = snapshot.val();
-  
-      // Don't allow creator to be kicked
-      if (targetUsername === group.createdBy) {
-        return res.status(403).json({ error: 'Cannot kick the group creator' });
-      }
-  
-      const updatedMembers = group.members.filter((m) => m !== targetUsername);
-      await groupRef.update({ members: updatedMembers });
-  
-      res.status(200).json({ message: `Kicked ${targetUsername} from the group` });
-    } catch (err) {
-      console.error('Kick user error:', err);
-      res.status(500).json({ error: 'Internal server error' });
+  const { groupId } = req.params;
+  const { targetUsername } = req.body;
+
+  if (!targetUsername) return res.status(400).json({ error: 'Target username required' });
+
+  try {
+    const groupRef = db.ref(`groups/${groupId}`);
+    const snapshot = await groupRef.once('value');
+    if (!snapshot.exists()) return res.status(404).json({ error: 'Group not found' });
+
+    const group = snapshot.val();
+
+    // Don't allow creator to be kicked
+    if (targetUsername === group.createdBy) {
+      return res.status(403).json({ error: 'Cannot kick the group creator' });
     }
-  });
+
+    const updatedMembers = group.members.filter((m) => m !== targetUsername);
+    await groupRef.update({ members: updatedMembers });
+
+    res.status(200).json({ message: `Kicked ${targetUsername} from the group` });
+  } catch (err) {
+    console.error('Kick user error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+ //polls
+
+ app.post('/polls', async (req, res) => {
+  const { pollName, question, notes, options, groupId, category, createdBy } = req.body;
+
+  if (!pollName || !question || !options || !groupId || !category || !createdBy) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    // Save poll directly under "polls/" instead of "polls/<groupId>/..."
+    const pollsRef = db.ref("polls").push();
+    const newPoll = {
+      pollName,
+      question,
+      notes: notes || "",
+      options,
+      category,
+      createdBy,
+      groupId, // Keep groupId for filtering
+      createdAt: Date.now(),
+      status: "Pending",
+      votes: {}  // Empty initially
+    };
+
+    await pollsRef.set(newPoll);
+    return res.status(200).json({ message: "Poll saved", poll: newPoll, id: pollsRef.key });
+  } catch (err) {
+    console.error("Error saving poll:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/polls/user/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const groupsRef = db.ref("groups");
+    const groupsSnap = await groupsRef.once("value");
+
+    const userGroupCodes = {}; // key: groupCode, value: { name, members }
+    groupsSnap.forEach(groupChild => {
+      const group = groupChild.val();
+      if (group.createdBy === username || (group.members && group.members.includes(username))) {
+        userGroupCodes[group.code] = {
+          name: group.name,
+          members: group.members || [],
+        };
+      }
+    });
+
+    //  Now we match by poll.groupId === group.code
+    const pollsRef = db.ref("polls");
+    const pollsSnap = await pollsRef.once("value");
+
+    const result = [];
+
+    pollsSnap.forEach(pollChild => {
+      const poll = pollChild.val();
+      const groupCode = poll.groupId;
+      const groupInfo = userGroupCodes[groupCode];
+
+      if (groupInfo) {
+        const hasVoted = poll.votes && poll.votes[username];
+        const totalVotes = poll.votes ? Object.keys(poll.votes).length : 0;
+
+        result.push({
+          ...poll,
+          id: pollChild.key,
+          groupCode,
+          groupName: groupInfo.name,
+          hasVoted,
+          status: poll.status || 'pending',
+          totalMembers: groupInfo.members.length,
+          totalVotes
+        });
+      }
+    });
+
+    console.log(`Found ${result.length} polls for user ${username}`);
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error("Error fetching polls:", err);
+    return res.status(500).json({ error: "Failed to fetch polls" });
+  }
+});
+
+app.post('/polls/:pollId/vote', async (req, res) => {
+  const { pollId } = req.params;
+  const { username, option, groupId } = req.body;
+
+  if (!username || !option || !groupId) {
+    return res.status(400).json({ error: 'Username, option, and groupId are required' });
+  }
+
+  try {
+    // Get the group to check members
+    const groupRef = db.ref(`groups`);
+    const groupSnap = await groupRef.once('value');
+    let targetGroup = null;
+
+    groupSnap.forEach(child => {
+      const g = child.val();
+      if (g.code === groupId) {
+        targetGroup = { ...g, key: child.key };
+      }
+    });
+
+    if (!targetGroup) {
+      return res.status(404).json({ error: 'Group not found' });
+    }
+
+    // Get the poll from flat /polls
+    const pollRef = db.ref(`polls/${pollId}`);
+    const pollSnap = await pollRef.once('value');
+
+    if (!pollSnap.exists()) {
+      return res.status(404).json({ error: 'Poll not found' });
+    }
+
+    const poll = pollSnap.val();
+
+    // Initialize votes if not present
+    if (!poll.votes) {
+      poll.votes = {};
+    }
+
+    // Record the vote
+    poll.votes[username] = option;
+
+    const totalMembers = targetGroup.members ? targetGroup.members.length : 0;
+    const totalVotes = Object.keys(poll.votes).length;
+
+    // If all members voted, mark as completed and tally
+    if (totalVotes >= totalMembers) {
+      poll.status = 'completed';
+
+      const results = {};
+      poll.options.forEach(opt => results[opt] = 0);
+
+      Object.values(poll.votes).forEach(v => {
+        results[v] = (results[v] || 0) + 1;
+      });
+
+      poll.results = results;
+    } else {
+      poll.status = 'pending';
+    }
+
+    await pollRef.update({
+      votes: poll.votes,
+      status: poll.status,
+      results: poll.results || null
+    });
+
+    return res.status(200).json({
+      message: 'Vote recorded',
+      pollStatus: poll.status,
+      votesCount: totalVotes,
+      totalMembers
+    });
+  } catch (err) {
+    console.error('Voting error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
