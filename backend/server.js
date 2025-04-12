@@ -449,8 +449,6 @@ app.get("/polls/user/:username", async (req, res) => {
   const { username } = req.params;
 
   try {
-    console.log(`Fetching polls for user: ${username}`);
-
     const groupsRef = db.ref("groups");
     const groupsSnap = await groupsRef.once("value");
 

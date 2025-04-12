@@ -54,7 +54,6 @@ const Polls = () => {
   const fetchPolls = async () => {
     setLoading(true);
     try {
-      console.log("Fetching polls for user:", username);
       const res = await fetch(`http://localhost:3500/polls/user/${username}`);
       const data = await res.json();
       console.log("Polls data received:", data);
