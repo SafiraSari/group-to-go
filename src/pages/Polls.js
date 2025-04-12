@@ -323,9 +323,9 @@ const Polls = () => {
             <h1>CREATING NEW POLL</h1>
             <Input label="Enter Poll Name" placeholder="Poll Name" value={pollName} onChange={(e) => setPollName(e.target.value)} />
             <div className="input-wrapper">
-              <label>Select Group:</label>
+            <h3><label className="modal-label">Select Group:</label></h3>
               <select value={groupId} onChange={(e) => setGroupId(e.target.value)}>
-                <option value="">-- Select a group --</option>
+                <option value="" disabled hidden>-- Select a group --</option>
                 {groups.map((group) => (
                   <option key={group.code} value={group.code}>
                     {group.name}
@@ -336,7 +336,9 @@ const Polls = () => {
             <Input label="Poll Question" placeholder="Question" value={question} onChange={(e) => setQuestion(e.target.value)} />
             <Input label="Additional Notes (optional)" placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
 
-            <h3>Select a Category: <strong>{selectedCategory.name}</strong></h3>
+            <label className="modal-label"><h3>
+              Select a Category: <strong>{selectedCategory.name}</strong></h3>
+              </label>
             <div className="option-button">
               {CATEGORIES.map((category, i) => (
                 <Button key={i} label={category.name} onClick={() => setSelectedCategory(category)} />

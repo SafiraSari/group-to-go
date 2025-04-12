@@ -142,6 +142,7 @@
 .selected-category {
   display: flex;
   justify-content: center;
+  
   margin: 1rem 0;
 }
 
@@ -187,4 +188,31 @@
   background-color: var(--SILVER);
   color: #fff; /* Or your preferred color */
   border-radius: 6px;
+}
+.polls-container select {
+  width: 105.5%;
+  height: 3.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: #fdfaf5;
+  color: #333;
+  outline: none;
+  transition: border 0.3s ease;
+}
+
+.polls-container select:focus {
+  border-color: var(--CARAMEL);
+}
+.modal-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--CARAMEL); /* same as Poll Question */
+  margin-bottom: 0.3rem;
+  display: block;
+}
+.polls-container select option:disabled {
+  color: #999; 
 }
